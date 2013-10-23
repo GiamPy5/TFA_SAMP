@@ -18,7 +18,7 @@
  * - TFASAMP_prepareConnection(host[], password[], api_key[], type[] = "development")
  * - TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = 1)
  * - TFASAMP_verifyToken(playerid, user_id, token, bool: force = true)
- * - TFASAMP_verifyTokenTime(playerid);
+ * - TFASAMP_verifyTokenTime(playerid)
 */
 
 /*
