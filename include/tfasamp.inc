@@ -66,6 +66,17 @@ new TFASAMP_PLAYER[MAX_PLAYERS][TFASAMP_playerInformation];
  * Functions
 */ 
 
+/*
+ * TFASAMP_prepareConnection
+ * This function prepares the connection to your hosting in order to request the APIs.
+ *
+ * host[] = Your webhosting link and the directory, if any (without http://).
+ * password[] = The password to use the PHP files to communicate with the APIs.
+ * api_key[] = You may find it in your Authy's dashboard.
+ * type[] = Choose your connection type between 'development' and 'production'.
+ *
+ * @returns false if failed, true if success.
+*/
 stock TFASAMP_prepareConnection(host[], password[], api_key[], type[] = "development") 
 {
 	if(isnull(host))
@@ -95,6 +106,18 @@ stock TFASAMP_prepareConnection(host[], password[], api_key[], type[] = "develop
 	return 1;
 }
 
+/*
+ * TFASAMP_addUser
+ * This function adds a new user to your Authy application.
+ *
+ * playerid = playerid of the player you wish to add in your Authy application.
+ * email[] = email of the player you wish to add in your Authy application.
+ * cellphone[] = Cellphone number of the player you wish to add in your Authy application.
+ * area_code[] = International cellphone number prefix - you may find them at www.countrycode.org under the 'Country Code' column.
+ *
+ * @returns true if the function has been properly executed, false if not.
+ * Notes: the callback TFASAMP_addUser_response will give you the userid of the player to be used for the token verification.
+*/
 stock TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = "1") 
 {
 	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
@@ -115,6 +138,20 @@ stock TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = "1")
 	return 1;
 }
 
+/*
+ * TFASAMP_verifyToken
+ * This function checks a token if valid or invalid.
+ *
+ * playerid = playerid of the player you wish to check the token.
+ * user_id[] = userid of the player you wish to check the token (check TFASAMP_addUser_response or your Authy's dashboard for clarifications).
+ * token[] = token to be checked.
+ * force[] (bool: true) = It's recommended to leave this true. If user has not finished registration any token always works.
+ *
+ * @returns true if the function has been properly executed, false if not.
+ * Notes: the callback TFASAMP_verifyToken_response will give you the userid of the player to be used for the token verification.
+ * Notes: also, 20 seconds after the confirmation the player has to verify the token again for security reasons.
+ * Notes: check TFASAMP_verifyTokenTime for clarifications.
+*/
 stock TFASAMP_verifyToken(playerid, user_id[], token[], bool: force = true)
 {
 	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
@@ -138,6 +175,14 @@ stock TFASAMP_verifyToken(playerid, user_id[], token[], bool: force = true)
 	return 1;
 }
 
+/*
+ * TFASAMP_verifyTokenTime
+ * This function checks if the token has been verified within 20 seconds.
+ *
+ * playerid = playerid of the player you wish to check the token.
+ *
+ * @returns true if it has been verified within 20 seconds, otherwise it returns false.
+*/
 stock TFASAMP_verifyTokenTime(playerid)
 {
 	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
