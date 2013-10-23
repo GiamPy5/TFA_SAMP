@@ -1,7 +1,7 @@
-TFASAMP
+TFA_SAMP
 =======
 
-Two-Faction authentication method for SA-MP (thanks to Authy for the APIs).
+Two-Factor authentication method for SA-MP (thanks to Authy for the APIs).
 
 Requirements
 ======
