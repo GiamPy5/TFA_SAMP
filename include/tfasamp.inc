@@ -207,11 +207,11 @@ stock TFASAMP_isTokenVerifiedValid(playerid)
 	#if TFASAMP_DEBUG == 1
 		printf("TFASAMP_DEBUG: 'TOKEN_CHECK' = '%d'", TFASAMP_PLAYER[playerid][TOKEN_CHECK]);
 		printf("TFASAMP_DEBUG: 'LAST_CHECK' = '%d'", TFASAMP_PLAYER[playerid][LAST_CHECK]);
-		printf("TFASAMP_DEBUG: 'gettime()-10' = '%d'", gettime()-10);
+		printf("TFASAMP_DEBUG: 'gettime()-20' = '%d'", gettime()-20);
 	#endif	
 	
 	if(TFASAMP_PLAYER[playerid][TOKEN_CHECK] == 1)
-		if(TFASAMP_PLAYER[playerid][LAST_CHECK] > (gettime()-10))
+		if(TFASAMP_PLAYER[playerid][LAST_CHECK] > (gettime()-20))
 			return true;
 			
 	return false;
