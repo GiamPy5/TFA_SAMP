@@ -134,7 +134,7 @@ stock TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = "1")
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%screate.php?password=%s&api_key=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], email, cellphone, area_code);
+	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=create&api_key=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], email, cellphone, area_code);
 	
 	if(!strcmp(TFASAMP_INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&development=true", _string);
@@ -173,7 +173,7 @@ stock TFASAMP_verifyToken(playerid, user_id, token[], bool: force = true)
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%scheck.php?password=%s&api_key=%s&userid=%d&token=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], user_id, token);
+	format(_string, sizeof(_string), "%execute.php?password=%s&command=check&api_key=%s&userid=%d&token=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], user_id, token);
 	
 	if(!strcmp(TFASAMP_INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&development=true", _string);
@@ -216,6 +216,7 @@ stock TFASAMP_isTokenVerifiedValid(playerid)
 			
 	return false;
 }
+
 /*
  * Callbacks
 */
