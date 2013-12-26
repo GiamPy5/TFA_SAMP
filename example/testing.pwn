@@ -10,7 +10,7 @@ new timerCheck[MAX_PLAYERS];
 
 public OnGameModeInit()
 {
-	TFASAMP_prepareConnection("localhost/tfasamp/", "testing", "39651918abb636a7f12adbc620793bb1", "production", true);
+	TFASAMP_prepareConnection("hostname", "password", "apikey", "production", true);
 	return 1;
 }
 
