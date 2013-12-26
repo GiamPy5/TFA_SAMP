@@ -5,12 +5,12 @@ main() {}
 
 new timerCheck[MAX_PLAYERS];
 
-#define 	DIALOG_SELECT_USERID		1000
-#define 	DIALOG_VERIFY_TOKEN			1001
+#define 	DIALOG_SELECT_USERID	1000
+#define 	DIALOG_VERIFY_TOKEN		1001
 
 public OnGameModeInit()
 {
-	TFASAMP_prepareConnection("hosting", "password", "apikey", "production");
+	TFASAMP_prepareConnection("localhost/tfasamp/", "testing", "39651918abb636a7f12adbc620793bb1", "production", true);
 	return 1;
 }
 
@@ -28,7 +28,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, 000000, "{FFFFFF}You have written your Authy's user id.");
 			
-			TFASAMP_PLAYER[playerid][USER_ID] = strval(inputtext);
+			TFASAMP_setPlayerUserID(playerid, strval(inputtext));
 			
 			ShowPlayerDialog(playerid, DIALOG_VERIFY_TOKEN, DIALOG_STYLE_INPUT, "Insert TOKEN", "This is a testing dialog. This phase should be voided for production gamemodes.\nInsert the TOKEN:", "Verify", "");	
 			return true;
@@ -38,7 +38,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, 000000, "{FFFFFF}Loading..");
 			
-			TFASAMP_verifyToken(playerid, TFASAMP_PLAYER[playerid][USER_ID], inputtext);
+			TFASAMP_verifyToken(playerid, TFASAMP_getPlayerUserID(playerid), inputtext);
 			
 			timerCheck[playerid] = SetTimerEx("checkTokenVerification", 500, true, "i", playerid);
 			return true;
@@ -51,8 +51,8 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 forward checkTokenVerification(playerid);
 public checkTokenVerification(playerid) 
 {
-	if(TFASAMP_PLAYER[playerid][REQUESTING_API])
-		return true;
+	if(TFASAMP_isHTTPProcessing(playerid))
+		return -1;
 	else 
 	{
 		KillTimer(timerCheck[playerid]);
