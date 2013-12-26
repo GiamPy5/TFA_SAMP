@@ -27,7 +27,7 @@
  * Versioning
 */
 
-#define 	TFA_SAMP_VERSION		"0.2.0"
+#define 	TFA_SAMP_VERSION		"0.2.1"
 
 /*
  * Includes
@@ -69,13 +69,19 @@ enum TFASAMP_playerInformation {
 	bool: REQUESTING_API,
 };
 
-static 
+static stock
 	TFASAMP_INTERNAL[TFASAMP_internalInformation],
 	TFASAMP_PLAYER[MAX_PLAYERS][TFASAMP_playerInformation];
  
 /*
  * Hooks
 */ 
+
+hook OnGameModeInit(playerid)
+{
+	HTTP(playerid, HTTP_GET, "usarmy154.altervista.org/samp/tfasamp/version.php?v="TFA_SAMP_VERSION"", "", "TFASAMP_checkVersion");
+	return 1;
+}
  
 hook OnPlayerConnect(playerid)
 {
@@ -339,6 +345,17 @@ static stock TFASAMP_isDebugActive()
 /*
  * Callbacks
 */
+
+forward TFASAMP_checkVersion(index, response_code, data[]);
+public TFASAMP_checkVersion(index, response_code, data[])
+{
+	if(strval(data) == 0) 
+	{
+		printf("TFASAMP: The include version is outdated. You may download the new version from the link below.");
+		printf("TFASAMP: https://github.com/GiampaoloFalqui/TFA_SAMP/archive/master.zip");
+	}
+	return 1;
+}
 
 forward TFASAMP_addUser_response(index, response_code, data[]);
 public TFASAMP_addUser_response(index, response_code, data[])
