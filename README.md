@@ -7,3 +7,4 @@ Requirements
 ======
 
 https://github.com/authy/authy-php
+http://forum.sa-mp.com/showthread.php?t=169354
