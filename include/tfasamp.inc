@@ -15,19 +15,13 @@
 
 /*
  * Available Functions:
- * - TFASAMP_prepareConnection(host[], password[], api_key[], type[] = "development", bool:debug = false)
- * - TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = 1)
- * - TFASAMP_verifyToken(playerid, user_id, token, bool: force = true)
- * - TFASAMP_isTokenVerifiedValid(playerid)
- * - TFASAMP_setPlayerUserID(playerid, userid)
- * - TFASAMP_getPlayerUserID(playerid)
+ * - TFASAMP::prepareConnection(host[], password[], api_key[], type[] = "development", bool:debug = false)
+ * - TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = 1)
+ * - TFASAMP::verifyToken(playerid, user_id, token, bool: force = true)
+ * - TFASAMP::isTokenVerifiedValid(playerid)
+ * - TFASAMP::setPlayerUserID(playerid, userid)
+ * - TFASAMP::getPlayerUserID(playerid)
 */
-
-/*
- * Versioning
-*/
-
-#define 	TFA_SAMP_VERSION		"0.2.1"
 
 /*
  * Includes
@@ -38,22 +32,38 @@
 #include			<YSI\y_stringhash>
 #include			<YSI\y_hooks>
 
+#define 			TFASAMP::					TFASAMP_
+
+/*
+ * Versioning
+*/
+
+#define 			TFASAMP_VERSION				"0.2.2"
+
 /*
  * Macros
 */
 
 #if !defined isnull
-	#define isnull(%1) ((%1[0] == 0) || (%1[0] == 1 && %1[1] == 0))		
+	#define 		isnull(%1) 					((%1[0] == 0) || (%1[0] == 1 && %1[1] == 0))		
 #endif
+
+#define 			TFASAMP_getHostname()		TFASAMP::INTERNAL[HOSTNAME]
+#define 			TFASAMP_getPassword()		TFASAMP::INTERNAL[PASSWORD]
+#define 			TFASAMP_getAPIKey()			TFASAMP::INTERNAL[API_KEY]
+#define 			TFASAMP_getConnectionType()	TFASAMP::INTERNAL[TYPE]
+#define 			TFASAMP_isDebugActive()		TFASAMP::INTERNAL[DEBUG_STATUS]
+
 
 /*
  * Variables Declaration
 */
 
 // Backward-compatibility define
-#define 	TFASAMP_verifyTokenTime(%0) TFASAMP_isTokenVerifiedValid(%0)
+#define 			TFASAMP_verifyTokenTime(%0) TFASAMP_isTokenVerifiedValid(%0)
 
-enum TFASAMP_internalInformation {
+enum TFASAMP::E_INTERNAL
+{
 	HOSTNAME[1024],
 	PASSWORD[128],
 	API_KEY[128],
@@ -62,16 +72,17 @@ enum TFASAMP_internalInformation {
 	bool: CONNECTION_PREPARED,
 };
 
-enum TFASAMP_playerInformation {
+enum TFASAMP::E_PLAYER
+{
 	USER_ID,
 	TOKEN_CHECK,
 	LAST_CHECK,
 	bool: REQUESTING_API,
 };
 
-static stock
-	TFASAMP_INTERNAL[TFASAMP_internalInformation],
-	TFASAMP_PLAYER[MAX_PLAYERS][TFASAMP_playerInformation];
+static stock 
+	TFASAMP::INTERNAL[TFASAMP::E_INTERNAL], 
+	TFASAMP::PLAYER[MAX_PLAYERS][TFASAMP::E_PLAYER];
  
 /*
  * Hooks
@@ -79,25 +90,25 @@ static stock
 
 hook OnGameModeInit(playerid)
 {
-	HTTP(playerid, HTTP_GET, "usarmy154.altervista.org/samp/tfasamp/version.php?v="TFA_SAMP_VERSION"", "", "TFASAMP_checkVersion");
+	HTTP(playerid, HTTP_GET, "usarmy154.altervista.org/samp/tfasamp/version.php?v="TFASAMP::VERSION"", "", "TFASAMP_checkVersion");
 	return 1;
 }
  
 hook OnPlayerConnect(playerid)
 {
-	TFASAMP_PLAYER[playerid][USER_ID] = 0;
-	TFASAMP_PLAYER[playerid][TOKEN_CHECK] = 0;
-	TFASAMP_PLAYER[playerid][LAST_CHECK] = 0;
-	TFASAMP_PLAYER[playerid][REQUESTING_API] = false;
+	TFASAMP::PLAYER[playerid][USER_ID] = 0;
+	TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
+	TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
+	TFASAMP::PLAYER[playerid][REQUESTING_API] = false;
 	return 1;
 }
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-	TFASAMP_PLAYER[playerid][USER_ID] = 0;
-	TFASAMP_PLAYER[playerid][TOKEN_CHECK] = 0;
-	TFASAMP_PLAYER[playerid][LAST_CHECK] = 0;
-	TFASAMP_PLAYER[playerid][REQUESTING_API] = false;
+	TFASAMP::PLAYER[playerid][USER_ID] = 0;
+	TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
+	TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
+	TFASAMP::PLAYER[playerid][REQUESTING_API] = false;
 	return 1;
 }
  
@@ -116,7 +127,7 @@ hook OnPlayerDisconnect(playerid, reason)
  *
  * @returns false if failed, true if success.
 */
-stock TFASAMP_prepareConnection(hostname[], password[], api_key[], type[] = "development", bool: tfa_debug = false) 
+stock TFASAMP::prepareConnection(hostname[], password[], api_key[], type[] = "development", bool: tfa_debug = false) 
 {
 	if(isnull(hostname))
 		return printf("TFASAMP: 'hostname' (%s) is invalid.", hostname), false;
@@ -129,8 +140,8 @@ stock TFASAMP_prepareConnection(hostname[], password[], api_key[], type[] = "dev
 		
 	switch(YHash(type))
 	{
-		case _H<production>: strcat(TFASAMP_INTERNAL[TYPE], "production", 128);
-		case _H<development>: strcat(TFASAMP_INTERNAL[TYPE], "development", 128);
+		case _H<production>: strcat(TFASAMP::INTERNAL[TYPE], "production", 128);
+		case _H<development>: strcat(TFASAMP::INTERNAL[TYPE], "development", 128);
 		
 		default: 
 		{
@@ -139,30 +150,30 @@ stock TFASAMP_prepareConnection(hostname[], password[], api_key[], type[] = "dev
 		}
 	}
 	
-	TFASAMP_INTERNAL[DEBUG_STATUS] = (tfa_debug) ? (true) : (false);
+	TFASAMP::INTERNAL[DEBUG_STATUS] = (tfa_debug) ? (true) : (false);
 	
-	strcat(TFASAMP_INTERNAL[HOSTNAME], hostname, 1024);
-	strcat(TFASAMP_INTERNAL[PASSWORD], password, 128);
-	strcat(TFASAMP_INTERNAL[API_KEY], api_key, 128);
+	strcat(TFASAMP::INTERNAL[HOSTNAME], hostname, 1024);
+	strcat(TFASAMP::INTERNAL[PASSWORD], password, 128);
+	strcat(TFASAMP::INTERNAL[API_KEY], api_key, 128);
 	
-	if(TFASAMP_isDebugActive())
+	if(TFASAMP::isDebugActive())
 	{	
-		print("(debug) TFASAMP_prepareConnection: Debug is active!");
-		print("(debug) TFASAMP_prepareConnection: Version "TFA_SAMP_VERSION" started.");
-		printf("(debug) TFASAMP_prepareConnection: 'hostname' = '%s'", TFASAMP_INTERNAL[HOSTNAME]);
-		printf("(debug) TFASAMP_prepareConnection: 'password' = '%s'", TFASAMP_INTERNAL[PASSWORD]);
-		printf("(debug) TFASAMP_prepareConnection: 'api_key' = '%s'", TFASAMP_INTERNAL[API_KEY]);
-		printf("(debug) TFASAMP_prepareConnection: 'type' = '%s'", TFASAMP_INTERNAL[TYPE]);
+		print("(debug) TFASAMP::prepareConnection: Debug is active!");
+		print("(debug) TFASAMP::prepareConnection: Version "TFASAMP::VERSION" started.");
+		printf("(debug) TFASAMP::prepareConnection: 'hostname' = '%s'", TFASAMP::getHostname());
+		printf("(debug) TFASAMP::prepareConnection: 'password' = '%s'", TFASAMP::getPassword());
+		printf("(debug) TFASAMP::prepareConnection: 'api_key' = '%s'", TFASAMP::getAPIKey());
+		printf("(debug) TFASAMP::prepareConnection: 'type' = '%s'", TFASAMP::getConnectionType());
 	}
 	
-	TFASAMP_INTERNAL[CONNECTION_PREPARED] = true;
+	TFASAMP::INTERNAL[CONNECTION_PREPARED] = true;
 	
 	print("TFASAMP: Connection prepared, awaiting for commands.");	
 	return true;
 }
 
 /*
- * TFASAMP_addUser
+ * TFASAMP::addUser
  * This function adds a new user to your Authy application.
  *
  * playerid = playerid of the player you wish to add in your Authy application.
@@ -171,100 +182,100 @@ stock TFASAMP_prepareConnection(hostname[], password[], api_key[], type[] = "dev
  * area_code[] = International cellphone number prefix - you may find them at www.countrycode.org under the 'Country Code' column.
  *
  * @returns true if the function has been properly executed, false if not.
- * Notes: the callback TFASAMP_addUser_response will give you the userid of the player to be used for the token verification.
+ * Notes: the callback TFASAMP::addUser_response will give you the userid of the player to be used for the token verification.
 */
-stock TFASAMP_addUser(playerid, email[], cellphone[], area_code[] = "1") 
+stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1") 
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	if(TFASAMP_PLAYER[playerid][REQUESTING_API])
+	if(TFASAMP::PLAYER[playerid][REQUESTING_API])
 		return print("TFASAMP: playerid %d has always an API request in progress, wait please."), false;
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=create&api_key=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], email, cellphone, area_code);
+	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=create&api_key=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), email, cellphone, area_code);
 	
-	if(!strcmp(TFASAMP_INTERNAL[TYPE], "development"))
+	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&development=true", _string);
 		
-	if(TFASAMP_isDebugActive())
-		printf("(debug) TFASAMP_addUser: '_string' = '%s'", _string);
+	if(TFASAMP::isDebugActive())
+		printf("(debug) TFASAMP::addUser: '_string' = '%s'", _string);
 	
-	TFASAMP_PLAYER[playerid][REQUESTING_API] = true;
+	TFASAMP::PLAYER[playerid][REQUESTING_API] = true;
 	
 	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_addUser_response");
 	return true;
 }
 
 /*
- * TFASAMP_verifyToken
+ * TFASAMP::verifyToken
  * This function checks a token if valid or invalid.
  *
  * playerid = playerid of the player you wish to check the token.
- * user_id[] = userid of the player you wish to check the token (check TFASAMP_addUser_response or your Authy's dashboard for clarifications).
+ * user_id[] = userid of the player you wish to check the token (check TFASAMP::addUser_response or your Authy's dashboard for clarifications).
  * token[] = token to be checked.
  * force[] (bool: true) = It's recommended to leave this true. If user has not finished registration any token always works.
  *
  * @returns true if the function has been properly executed, false if not.
- * Notes: the callback TFASAMP_verifyToken_response will give you the userid of the player to be used for the token verification.
+ * Notes: the callback TFASAMP::verifyToken_response will give you the userid of the player to be used for the token verification.
  * Notes: also, 20 seconds after the confirmation the player has to verify the token again for security reasons.
- * Notes: check TFASAMP_verifyTokenTime for clarifications.
+ * Notes: check TFASAMP::verifyTokenTime for clarifications.
 */
-stock TFASAMP_verifyToken(playerid, user_id, token[], bool: force = true)
+stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 			
-	if(TFASAMP_isHTTPProcessing(playerid))
+	if(TFASAMP::isHTTPProcessing(playerid))
 		return printf("TFASAMP: playerid %d has already an API request in progress, wait please.", playerid), false;	
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=check&api_key=%s&userid=%d&token=%s", TFASAMP_INTERNAL[HOSTNAME], TFASAMP_INTERNAL[PASSWORD], TFASAMP_INTERNAL[API_KEY], user_id, token);
+	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=check&api_key=%s&userid=%d&token=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), user_id, token);
 	
-	if(!strcmp(TFASAMP_INTERNAL[TYPE], "development"))
+	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&development=true", _string);
 		
 	if(!force)
 		format(_string, sizeof(_string), "%s&force=false", _string);
 		
-	if(TFASAMP_isDebugActive())
-		printf("(debug) TFASAMP_debugStatus: '_string' = '%s'", _string);
+	if(TFASAMP::isDebugActive())
+		printf("(debug) TFASAMP::debugStatus: '_string' = '%s'", _string);
 	
-	TFASAMP_PLAYER[playerid][REQUESTING_API] = true;
+	TFASAMP::PLAYER[playerid][REQUESTING_API] = true;
 		
 	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_verifyToken_response");
 	return true;
 }
 
 /*
- * TFASAMP_isTokenVerifiedValid
+ * TFASAMP::isTokenVerifiedValid
  * This function checks if the token has been verified within 20 seconds and if the user has been verified properly.
  *
  * playerid = playerid of the player you wish to check the token.
  *
  * @returns true if it has been verified within 20 seconds, otherwise it returns false.
 */
-stock TFASAMP_isTokenVerifiedValid(playerid)
+stock TFASAMP::isTokenVerifiedValid(playerid)
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 	
-	if(TFASAMP_isDebugActive())
+	if(TFASAMP::isDebugActive())
 	{
-		printf("(debug) TFASAMP_isTokenVerifiedValid: 'TOKEN_CHECK' = '%d'", TFASAMP_PLAYER[playerid][TOKEN_CHECK]);
-		printf("(debug) TFASAMP_isTokenVerifiedValid: 'LAST_CHECK' = '%d'", TFASAMP_PLAYER[playerid][LAST_CHECK]);
-		printf("(debug) TFASAMP_isTokenVerifiedValid: 'gettime()-20' = '%d'", gettime()-20);
+		printf("(debug) TFASAMP::isTokenVerifiedValid: 'TOKEN_CHECK' = '%d'", TFASAMP::PLAYER[playerid][TOKEN_CHECK]);
+		printf("(debug) TFASAMP::isTokenVerifiedValid: 'LAST_CHECK' = '%d'", TFASAMP::PLAYER[playerid][LAST_CHECK]);
+		printf("(debug) TFASAMP::isTokenVerifiedValid: 'gettime()-20' = '%d'", gettime()-20);
 	}
 	
-	if(TFASAMP_PLAYER[playerid][TOKEN_CHECK] == 1) 
-		if(TFASAMP_PLAYER[playerid][LAST_CHECK] > (gettime()-20)) 
+	if(TFASAMP::PLAYER[playerid][TOKEN_CHECK] == 1) 
+		if(TFASAMP::PLAYER[playerid][LAST_CHECK] > (gettime()-20)) 
 			return true;
 		else
 		{
-			TFASAMP_PLAYER[playerid][TOKEN_CHECK] = 0;
-			TFASAMP_PLAYER[playerid][LAST_CHECK] = 0;
+			TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
+			TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
 			return false;
 		}
 		
@@ -272,23 +283,23 @@ stock TFASAMP_isTokenVerifiedValid(playerid)
 }
 
 /*
- * TFASAMP_isHTTPProcessing
+ * TFASAMP::isHTTPProcessing
  * This function checks if the HTTP server is still processing the request.
  *
  * playerid = playerid of the player you wish to check.
  *
  * @returns true if it's still processing, otherwise false.
 */
-stock TFASAMP_isHTTPProcessing(playerid) 
+stock TFASAMP::isHTTPProcessing(playerid) 
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	return TFASAMP_PLAYER[playerid][REQUESTING_API];
+	return TFASAMP::PLAYER[playerid][REQUESTING_API];
 }
 	
 /*
- * TFASAMP_setPlayerUserID
+ * TFASAMP::setPlayerUserID
  * This function sets the Authy's userid to a playerid.
  *
  * playerid = playerid of the player you wish to set.
@@ -296,58 +307,37 @@ stock TFASAMP_isHTTPProcessing(playerid)
  *
  * @returns true if the connection is prepared, otherwise false.
 */
-stock TFASAMP_setPlayerUserID(playerid, userid) 
+stock TFASAMP::setPlayerUserID(playerid, userid) 
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	TFASAMP_PLAYER[playerid][USER_ID] = userid;
+	TFASAMP::PLAYER[playerid][USER_ID] = userid;
 	return true;
 }
 
 /*
- * TFASAMP_getPlayerUserID
+ * TFASAMP::getPlayerUserID
  * This function retrieves the Authy's userid of a playerid.
  *
  * playerid = playerid of the player you wish to know the authy userid.
  *
  * @returns the authy userid of the playerid if the connection is prepared, otherwise false.
 */
-stock TFASAMP_getPlayerUserID(playerid) 
+stock TFASAMP::getPlayerUserID(playerid) 
 {
-	if(!TFASAMP_INTERNAL[CONNECTION_PREPARED])
+	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	return TFASAMP_PLAYER[playerid][USER_ID];
+	return TFASAMP::PLAYER[playerid][USER_ID];
 }
-
-/*
- * Internal Functions
-*/
-
-/*
-stock TFASAMP_get(parameter[])
-{
-	switch(YHash(parameter))
-	{
-		case _H<hostname>: return TFASAMP_INTERNAL[HOSTNAME];
-		case _H<password>: return TFASAMP_INTERNAL[PASSWORD];
-		case _H<apikey>: return TFASAMP_INTERNAL[API_KEY];
-		case _H<connectiontype>: return TFASAMP_INTERNAL[TYPE];
-	}
-	return false;
-}
-*/
-
-static stock TFASAMP_isDebugActive()
-	return TFASAMP_INTERNAL[DEBUG_STATUS];
 
 /*
  * Callbacks
 */
 
-forward TFASAMP_checkVersion(index, response_code, data[]);
-public TFASAMP_checkVersion(index, response_code, data[])
+forward TFASAMP::checkVersion(index, response_code, data[]);
+public TFASAMP::checkVersion(index, response_code, data[])
 {
 	if(strval(data) == 0) 
 	{
@@ -357,48 +347,48 @@ public TFASAMP_checkVersion(index, response_code, data[])
 	return 1;
 }
 
-forward TFASAMP_addUser_response(index, response_code, data[]);
-public TFASAMP_addUser_response(index, response_code, data[])
+forward TFASAMP::addUser_response(index, response_code, data[]);
+public TFASAMP::addUser_response(index, response_code, data[])
 {
-	if(TFASAMP_isDebugActive())
+	if(TFASAMP::isDebugActive())
 	{
-		printf("(debug) TFASAMP_addUser_response: 'index' = '%d'", index);
-		printf("(debug) TFASAMP_addUser_response: 'response_code' = '%d'", response_code);
-		printf("(debug) TFASAMP_addUser_response: 'data' = '%s'", data);
+		printf("(debug) TFASAMP::addUser_response: 'index' = '%d'", index);
+		printf("(debug) TFASAMP::addUser_response: 'response_code' = '%d'", response_code);
+		printf("(debug) TFASAMP::addUser_response: 'data' = '%s'", data);
 	}
 	
-	TFASAMP_PLAYER[index][REQUESTING_API] = false;
+	TFASAMP::PLAYER[index][REQUESTING_API] = false;
 	
-    if(!TFASAMP_IsNumeric(data))
+    if(!TFASAMP::IsNumeric(data))
 		return printf("TFASAMP ERROR: %s", data), false;
 	else
-		TFASAMP_PLAYER[index][USER_ID] = strval(data);	
+		TFASAMP::PLAYER[index][USER_ID] = strval(data);	
 	return 1;
 }
 
-forward TFASAMP_verifyToken_response(index, response_code, data[]);
-public TFASAMP_verifyToken_response(index, response_code, data[])
+forward TFASAMP::verifyToken_response(index, response_code, data[]);
+public TFASAMP::verifyToken_response(index, response_code, data[])
 {
-	if(TFASAMP_isDebugActive())
+	if(TFASAMP::isDebugActive())
 	{
-		printf("(debug) TFASAMP_verifyToken_response: 'index' = '%d'", index);
-		printf("(debug) TFASAMP_verifyToken_response: 'response_code' = '%d'", response_code);
-		printf("(debug) TFASAMP_verifyToken_response: 'data' = '%s'", data);
+		printf("(debug) TFASAMP::verifyToken_response: 'index' = '%d'", index);
+		printf("(debug) TFASAMP::verifyToken_response: 'response_code' = '%d'", response_code);
+		printf("(debug) TFASAMP::verifyToken_response: 'data' = '%s'", data);
 	}
 	
-	TFASAMP_PLAYER[index][REQUESTING_API] = false;
+	TFASAMP::PLAYER[index][REQUESTING_API] = false;
 	
-    if(!TFASAMP_IsNumeric(data))
+    if(!TFASAMP::IsNumeric(data))
 		return printf("TFASAMP ERROR: %s", data), false;
 	else 
 	{
-		TFASAMP_PLAYER[index][LAST_CHECK] = gettime();
-		TFASAMP_PLAYER[index][TOKEN_CHECK] = strval(data);
+		TFASAMP::PLAYER[index][LAST_CHECK] = gettime();
+		TFASAMP::PLAYER[index][TOKEN_CHECK] = strval(data);
 	}
 	return 1;
 }
 
-stock TFASAMP_IsNumeric(const string[])
+stock TFASAMP::IsNumeric(const string[])
 {
     for (new i = 0, j = strlen(string); i < j; i++)
     {
