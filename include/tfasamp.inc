@@ -54,7 +54,6 @@
 #define 			TFASAMP_getConnectionType()	TFASAMP::INTERNAL[TYPE]
 #define 			TFASAMP_isDebugActive()		TFASAMP::INTERNAL[DEBUG_STATUS]
 
-
 /*
  * Variables Declaration
 */
@@ -74,10 +73,10 @@ enum TFASAMP::E_INTERNAL
 
 enum TFASAMP::E_PLAYER
 {
-	USER_ID,
-	TOKEN_CHECK,
-	LAST_CHECK,
-	bool: REQUESTING_API,
+	AUTHY_USER_ID,
+	TOKEN_CHECK_STATUS,
+	LAST_CHECK_UNIX,
+	bool: IS_HTTP_PROCESSING,
 };
 
 static stock 
@@ -96,19 +95,19 @@ hook OnGameModeInit(playerid)
  
 hook OnPlayerConnect(playerid)
 {
-	TFASAMP::PLAYER[playerid][USER_ID] = 0;
-	TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
-	TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
-	TFASAMP::PLAYER[playerid][REQUESTING_API] = false;
+	TFASAMP::PLAYER[playerid][AUTHY_USER_ID] = 0;
+	TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
+	TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] = 0;
+	TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING] = false;
 	return 1;
 }
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-	TFASAMP::PLAYER[playerid][USER_ID] = 0;
-	TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
-	TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
-	TFASAMP::PLAYER[playerid][REQUESTING_API] = false;
+	TFASAMP::PLAYER[playerid][AUTHY_USER_ID] = 0;
+	TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
+	TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] = 0;
+	TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING] = false;
 	return 1;
 }
  
@@ -189,7 +188,7 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	if(TFASAMP::PLAYER[playerid][REQUESTING_API])
+	if(TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING])
 		return print("TFASAMP: playerid %d has always an API request in progress, wait please."), false;
 		
 	new _string[1024];
@@ -202,7 +201,7 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
 	if(TFASAMP::isDebugActive())
 		printf("(debug) TFASAMP::addUser: '_string' = '%s'", _string);
 	
-	TFASAMP::PLAYER[playerid][REQUESTING_API] = true;
+	TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING] = true;
 	
 	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_addUser_response");
 	return true;
@@ -243,7 +242,7 @@ stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
 	if(TFASAMP::isDebugActive())
 		printf("(debug) TFASAMP::debugStatus: '_string' = '%s'", _string);
 	
-	TFASAMP::PLAYER[playerid][REQUESTING_API] = true;
+	TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING] = true;
 		
 	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_verifyToken_response");
 	return true;
@@ -264,18 +263,18 @@ stock TFASAMP::isTokenVerifiedValid(playerid)
 	
 	if(TFASAMP::isDebugActive())
 	{
-		printf("(debug) TFASAMP::isTokenVerifiedValid: 'TOKEN_CHECK' = '%d'", TFASAMP::PLAYER[playerid][TOKEN_CHECK]);
-		printf("(debug) TFASAMP::isTokenVerifiedValid: 'LAST_CHECK' = '%d'", TFASAMP::PLAYER[playerid][LAST_CHECK]);
+		printf("(debug) TFASAMP::isTokenVerifiedValid: 'TOKEN_CHECK_STATUS' = '%d'", TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS]);
+		printf("(debug) TFASAMP::isTokenVerifiedValid: 'LAST_CHECK_UNIX' = '%d'", TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX]);
 		printf("(debug) TFASAMP::isTokenVerifiedValid: 'gettime()-20' = '%d'", gettime()-20);
 	}
 	
-	if(TFASAMP::PLAYER[playerid][TOKEN_CHECK] == 1) 
-		if(TFASAMP::PLAYER[playerid][LAST_CHECK] > (gettime()-20)) 
+	if(TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] == 1) 
+		if(TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] > (gettime()-20)) 
 			return true;
 		else
 		{
-			TFASAMP::PLAYER[playerid][TOKEN_CHECK] = 0;
-			TFASAMP::PLAYER[playerid][LAST_CHECK] = 0;
+			TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
+			TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] = 0;
 			return false;
 		}
 		
@@ -295,7 +294,7 @@ stock TFASAMP::isHTTPProcessing(playerid)
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	return TFASAMP::PLAYER[playerid][REQUESTING_API];
+	return TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING];
 }
 	
 /*
@@ -312,7 +311,7 @@ stock TFASAMP::setPlayerUserID(playerid, userid)
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	TFASAMP::PLAYER[playerid][USER_ID] = userid;
+	TFASAMP::PLAYER[playerid][AUTHY_USER_ID] = userid;
 	return true;
 }
 
@@ -329,7 +328,7 @@ stock TFASAMP::getPlayerUserID(playerid)
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
 		
-	return TFASAMP::PLAYER[playerid][USER_ID];
+	return TFASAMP::PLAYER[playerid][AUTHY_USER_ID];
 }
 
 /*
@@ -357,12 +356,12 @@ public TFASAMP::addUser_response(index, response_code, data[])
 		printf("(debug) TFASAMP::addUser_response: 'data' = '%s'", data);
 	}
 	
-	TFASAMP::PLAYER[index][REQUESTING_API] = false;
+	TFASAMP::PLAYER[index][IS_HTTP_PROCESSING] = false;
 	
     if(!TFASAMP::IsNumeric(data))
 		return printf("TFASAMP ERROR: %s", data), false;
 	else
-		TFASAMP::PLAYER[index][USER_ID] = strval(data);	
+		TFASAMP::PLAYER[index][AUTHY_USER_ID] = strval(data);	
 	return 1;
 }
 
@@ -376,14 +375,14 @@ public TFASAMP::verifyToken_response(index, response_code, data[])
 		printf("(debug) TFASAMP::verifyToken_response: 'data' = '%s'", data);
 	}
 	
-	TFASAMP::PLAYER[index][REQUESTING_API] = false;
+	TFASAMP::PLAYER[index][IS_HTTP_PROCESSING] = false;
 	
     if(!TFASAMP::IsNumeric(data))
 		return printf("TFASAMP ERROR: %s", data), false;
 	else 
 	{
-		TFASAMP::PLAYER[index][LAST_CHECK] = gettime();
-		TFASAMP::PLAYER[index][TOKEN_CHECK] = strval(data);
+		TFASAMP::PLAYER[index][LAST_CHECK_UNIX] = gettime();
+		TFASAMP::PLAYER[index][TOKEN_CHECK_STATUS] = strval(data);
 	}
 	return 1;
 }
