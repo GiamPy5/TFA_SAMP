@@ -33,25 +33,10 @@
  * Includes
 */
 
-#tryinclude			<a_samp>
-#if !defined _inc_a_samp
-	#error			You need a_samp.inc to run tfasamp.inc.
-#endif
-
-#tryinclude			<a_http>
-#if !defined _inc_a_http
-	#error			You need a_http.inc to run tfasamp.inc.
-#endif
-
-#tryinclude			<YSI\y_stringhash>
-#if !defined _inc_y_stringhash
-	#error			You need YSI\y_stringhash to run tfasamp.inc.
-#endif
-
-#tryinclude			<YSI\y_hooks>
-#if !defined _inc_y_hooks
-	#error			You need YSI\y_hooks to run tfasamp.inc.
-#endif
+#include			<a_samp>
+#include			<a_http>
+#include			<YSI\y_stringhash>
+#include			<YSI\y_hooks>
 
 /*
  * Macros
