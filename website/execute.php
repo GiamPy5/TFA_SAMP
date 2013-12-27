@@ -18,13 +18,13 @@
 require 'internal/settings.php';
 require 'Authy/Authy.php';
 
-if(!isset($_GET['password']) || $_GET['password'] != $TFA_SAMP['password']) 
+if(!isset(htmlspecialchars$_GET['password']) || htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
 	die("The password is wrong or not valid.");	
 	
 if(!isset($_GET['command'])) 
 	die("No command has been selected.");
 	
-if(isset($_GET['command']) && !file_exists('commands/' . $_GET['command'] . '.php'))
+if(isset($_GET['command']) && !file_exists('commands/' . htmlspecialchars($_GET['command']) . '.php'))
 	die("The selected command does not exist.");	
 else 
-	include('commands/' . $_GET['command'] . '.php');
+	include('commands/' . htmlspecialchars($_GET['command']) . '.php');

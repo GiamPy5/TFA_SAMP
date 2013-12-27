@@ -3,14 +3,12 @@
 
 main() {}
 
-new timerCheck[MAX_PLAYERS];
-
 #define 	DIALOG_SELECT_USERID	1000
 #define 	DIALOG_VERIFY_TOKEN		1001
 
 public OnGameModeInit()
 {
-	TFASAMP::prepareConnection("hostname", "password", "apikey", "production", true);
+	TFASAMP::prepareConnection("localhost/tfasamp/", "testing", "4c40dd4e7b22433ae199ed893b8a49d5", "production", true);
 	return 1;
 }
 
@@ -38,9 +36,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, 000000, "{FFFFFF}Loading..");
 			
-			TFASAMP::verifyToken(playerid, TFASAMP_getPlayerUserID(playerid), inputtext);
-			
-			timerCheck[playerid] = SetTimerEx("checkTokenVerification", 500, true, "i", playerid);
+			TFASAMP::verifyToken(playerid, TFASAMP::getPlayerUserID(playerid), inputtext);
 			return true;
 		}		
 	}
@@ -48,18 +44,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return false;
 }
 
-forward checkTokenVerification(playerid);
-public checkTokenVerification(playerid) 
+public TFASAMP::OnTokenVerify(playerid, result) 
 {
-	if(TFASAMP::isHTTPProcessing(playerid))
-		return -1;
-	else 
-	{
-		KillTimer(timerCheck[playerid]);
-		
-		if(TFASAMP::isTokenVerifiedValid(playerid))
-			return SendClientMessage(playerid, 000000, "{FFFFFF}The token was valid!"), true;
-		else
-			return SendClientMessage(playerid, 000000, "{FF0000}The token was invalid!"), false;
-	}
+	if(result == 1)
+		SendClientMessage(playerid, 000000, "{FFFFFF}The token was valid!");
+	else
+		SendClientMessage(playerid, 000000, "{FF0000}The token was invalid!");
 }

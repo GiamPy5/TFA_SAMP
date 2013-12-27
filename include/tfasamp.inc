@@ -18,9 +18,12 @@
  * - TFASAMP::prepareConnection(host[], password[], api_key[], type[] = "development", bool:debug = false)
  * - TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = 1)
  * - TFASAMP::verifyToken(playerid, user_id, token, bool: force = true)
- * - TFASAMP::isTokenVerifiedValid(playerid)
+ * - (DEPRECATED - REMOVED AT v1.0.0) TFASAMP::isTokenVerifiedValid(playerid)
  * - TFASAMP::setPlayerUserID(playerid, userid)
  * - TFASAMP::getPlayerUserID(playerid)
+ *
+ * Available Callbacks:
+ * - TFASAMP::OnTokenVerify(playerid, result)
 */
 
 /*
@@ -33,6 +36,8 @@
 #include			<YSI\y_hooks>
 
 #define 			TFASAMP::					TFASAMP_
+
+forward public 		TFASAMP::OnTokenVerify(playerid, result);
 
 /*
  * Versioning
@@ -256,6 +261,7 @@ stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
  *
  * @returns true if it has been verified within 20 seconds, otherwise it returns false.
 */
+#pragma deprecated TFASAMP_isTokenVerifiedValid
 stock TFASAMP::isTokenVerifiedValid(playerid)
 {
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
@@ -381,6 +387,7 @@ public TFASAMP::verifyToken_response(index, response_code, data[])
 		return printf("TFASAMP ERROR: %s", data), false;
 	else 
 	{
+		CallLocalFunction("TFASAMP_OnTokenVerify", "dd", index, strval(data));
 		TFASAMP::PLAYER[index][LAST_CHECK_UNIX] = gettime();
 		TFASAMP::PLAYER[index][TOKEN_CHECK_STATUS] = strval(data);
 	}

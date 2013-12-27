@@ -16,7 +16,7 @@
 */
 	
 if(isset($_GET['api_key']))
-	$TFA_SAMP['authy_api'] = (isset($_GET['development']) && $_GET['development'] == 'true') ? new Authy_Api($_GET['api_key'], 'http://sandbox-api.authy.com') : new Authy_Api($_GET['api_key'], 'https://api.authy.com');
+	$TFA_SAMP['authy_api'] = (isset($_GET['development']) && $_GET['development'] == 'true') ? new Authy_Api(htmlspecialchars($_GET['api_key']), 'http://sandbox-api.authy.com') : new Authy_Api(htmlspecialchars($_GET['api_key']), 'https://api.authy.com');
 else
 	die("'api_key' is invalid.");
 
@@ -29,7 +29,7 @@ if(!isset($_GET['cellphone']))
 if(!isset($_GET['area_code'])) 
 	die("'area_code' is missing.");
 	
-$newUser = $TFA_SAMP['authy_api']->registerUser($_GET['email'], $_GET['cellphone'], $_GET['area_code']);
+$newUser = $TFA_SAMP['authy_api']->registerUser(htmlspecialchars($_GET['email']), htmlspecialchars($_GET['cellphone']), htmlspecialchars($_GET['area_code']));
 
 if($newUser->ok()) 
 {
