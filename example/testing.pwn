@@ -8,7 +8,7 @@ main() {}
 
 public OnGameModeInit()
 {
-	TFASAMP::prepareConnection("localhost/tfasamp/", "testing", "4c40dd4e7b22433ae199ed893b8a49d5", "production", true);
+	TFASAMP::prepareConnection("hosting", "password", "apikey", "production", true);
 	return 1;
 }
 

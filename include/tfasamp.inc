@@ -43,7 +43,7 @@ forward public 		TFASAMP::OnTokenVerify(playerid, result);
  * Versioning
 */
 
-#define 			TFASAMP_VERSION				"0.2.2"
+#define 			TFASAMP_VERSION				"0.2.4"
 
 /*
  * Macros
