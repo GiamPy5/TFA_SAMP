@@ -18,7 +18,7 @@
 require 'internal/settings.php';
 require 'Authy/Authy.php';
 
-if(!isset(htmlspecialchars$_GET['password']) || htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
+if(!isset(htmlspecialchars($_GET['password']) || htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
 	die("The password is wrong or not valid.");	
 	
 if(!isset($_GET['command'])) 
