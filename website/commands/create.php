@@ -16,7 +16,11 @@
 */
 	
 if(isset($_GET['api_key']))
-	$TFA_SAMP['authy_api'] = (isset($_GET['development']) && $_GET['development'] == 'true') ? new Authy_Api(htmlspecialchars($_GET['api_key']), 'http://sandbox-api.authy.com') : new Authy_Api(htmlspecialchars($_GET['api_key']), 'https://api.authy.com');
+{
+	$TFA_SAMP['authy_api'] = 	(isset($_GET['development']) && $_GET['development'] == 'true') 					
+								? new Authy_Api(htmlspecialchars($_GET['api_key']), 'http://sandbox-api.authy.com') 	
+								: new Authy_Api(htmlspecialchars($_GET['api_key']), 'https://api.authy.com');
+}
 else
 	die("'api_key' is invalid.");
 

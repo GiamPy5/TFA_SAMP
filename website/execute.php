@@ -18,13 +18,40 @@
 require 'internal/settings.php';
 require 'Authy/Authy.php';
 
-if(!isset(htmlspecialchars$_GET['password']) || htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
-	die("The password is wrong or not valid.");	
+if(!isset($_GET['password']))
+	die("The password has not been set.");
+
+if(htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
+	die("The password is invalid.");	
 	
+$aFiles = array_values(array_diff(scandir('commands'), array('..', '.')));
+
+for($i = 0; $i < count($aFiles); $i++)
+	$aFiles[$i] = substr($aFiles[$i], 0, strrpos($aFiles[$i], "."));
+
 if(!isset($_GET['command'])) 
-	die("No command has been selected.");
+{
+	echo("No command has been selected.<br/>");		
+	echo("The following commands are available:");		
+	echo('<ul type="disc">');
 	
-if(isset($_GET['command']) && !file_exists('commands/' . htmlspecialchars($_GET['command']) . '.php'))
-	die("The selected command does not exist.");	
+	for($i = 0; $i < count($aFiles); $i++)
+		echo('<li>' . $aFiles[$i] . '</li>');
+
+	echo('</ul>');
+	exit();
+}
+
+if(!in_array(htmlspecialchars($_GET['command']), $aFiles)) 
+{
+	echo("The selected command does not exist.<br/>");
+	echo("The following commands are available:");		
+	echo('<ul type="disc">');
+	
+	for($i = 0; $i < count($aFiles); $i++)
+		echo('<li>' . $aFiles[$i] . '</li>');
+
+	echo('</ul>');	
+}
 else 
 	include('commands/' . htmlspecialchars($_GET['command']) . '.php');
