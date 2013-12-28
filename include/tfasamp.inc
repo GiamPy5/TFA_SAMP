@@ -43,7 +43,7 @@ forward public 		TFASAMP::OnTokenVerify(playerid, result);
  * Versioning
 */
 
-#define 			TFASAMP_VERSION				"0.2.4"
+#define 			TFASAMP_VERSION				"1.0.0-alpha"
 
 /*
  * Macros
@@ -198,10 +198,12 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=create&api_key=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), email, cellphone, area_code);
+	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=create&api=%s&email=%s&cellphone=%s&area_code=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), email, cellphone, area_code);
 	
 	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
-		format(_string, sizeof(_string), "%s&development=true", _string);
+		format(_string, sizeof(_string), "%s&type=development", _string);
+	else
+		format(_string, sizeof(_string), "%s&type=production", _string);
 		
 	if(TFASAMP::isDebugActive())
 		printf("(debug) TFASAMP::addUser: '_string' = '%s'", _string);
@@ -239,10 +241,12 @@ stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
 	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=check&api_key=%s&userid=%d&token=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), user_id, token);
 	
 	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
-		format(_string, sizeof(_string), "%s&development=true", _string);
+		format(_string, sizeof(_string), "%s&type=development", _string);
+	else
+		format(_string, sizeof(_string), "%s&type=production", _string);
 		
 	if(!force)
-		format(_string, sizeof(_string), "%s&force=false", _string);
+		format(_string, sizeof(_string), "%s&settings[force]=false", _string);
 		
 	if(TFASAMP::isDebugActive())
 		printf("(debug) TFASAMP::debugStatus: '_string' = '%s'", _string);
