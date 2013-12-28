@@ -15,43 +15,35 @@
  * GNU General Public License for more details.
 */
 
-require 'internal/settings.php';
-require 'Authy/Authy.php';
-
 if(!isset($_GET['password']))
-	die("The password has not been set.");
+	die('Password must be sent.');
 
-if(htmlspecialchars($_GET['password']) != $TFA_SAMP['password']) 
-	die("The password is invalid.");	
+if(!isset($_GET['api']))
+	die('API key must be sent.');
 	
-$aFiles = array_values(array_diff(scandir('commands'), array('..', '.')));
+require_once 'class/tfasamp.php';	
 
-for($i = 0; $i < count($aFiles); $i++)
-	$aFiles[$i] = substr($aFiles[$i], 0, strrpos($aFiles[$i], "."));
-
-if(!isset($_GET['command'])) 
+try
 {
-	echo("No command has been selected.<br/>");		
-	echo("The following commands are available:");		
-	echo('<ul type="disc">');
-	
-	for($i = 0; $i < count($aFiles); $i++)
-		echo('<li>' . $aFiles[$i] . '</li>');
-
-	echo('</ul>');
-	exit();
+	CTFA_SAMP::connect($_GET['password'], $_GET['api'], 'production');
+}
+catch(Exception $error)
+{
+	echo $error->getMessage();
 }
 
-if(!in_array(htmlspecialchars($_GET['command']), $aFiles)) 
+switch($_GET['command'])
 {
-	echo("The selected command does not exist.<br/>");
-	echo("The following commands are available:");		
-	echo('<ul type="disc">');
+	case 'create': 
+	{
+		$TFA_SAMP->createUser($_GET['email'], $_GET['cellphone'], $_GET['area_code']);
+		break;
+	}
+	case 'check':
+	{
+		$TFA_SAMP->verifyToken($_GET['userid'], $_GET['token'], $_GET['settings']);
+		break;
+	}
 	
-	for($i = 0; $i < count($aFiles); $i++)
-		echo('<li>' . $aFiles[$i] . '</li>');
-
-	echo('</ul>');	
+	default: die('Invalid command.');
 }
-else 
-	include('commands/' . htmlspecialchars($_GET['command']) . '.php');
