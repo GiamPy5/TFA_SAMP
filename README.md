@@ -1,7 +1,7 @@
 TFA_SAMP
 =======
 
-Two-Factor authentication method for SA-MP (thanks to Authy for the APIs).
+Two-Factor authentication method for SA-MP (thanks to Authy for the web APIs).
 
 Requirements
 ======
