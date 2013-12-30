@@ -35,7 +35,7 @@ class CTFA_SAMP
 	private static $allowedPassword = 'testing';
 	
 	# These are the addresses allowed to communicate with TFA_SAMP.
-	private static $allowedAddress = array('127.0.0.2');
+	private static $allowedAddress = array('127.0.0.1');
 	
 	# Here you may choose the reportingLevel between: $NONE, $NOTICE and $ERROR. If undefined or invalid, $ERROR will be set as default.
 	private static $fileDebugging = reportingLevel::ERROR;
@@ -44,8 +44,7 @@ class CTFA_SAMP
 	private $API;
 	private $connectionURL;
 	
-	private $connectionAllowed;
-	
+	# The constructor is private because we use ::connect to initialize the object and make the internal checks.
 	private function __construct($password, $API, $connectionURL)
 	{
 		$this->password = $password;
@@ -53,6 +52,8 @@ class CTFA_SAMP
 		$this->connectionURL = $connectionURL;
 	}
 	
+	# ::connect works as 'class constructor' even if technically it is not. 
+	# It checks if the security parameters and function arguments are correct before returning the class istance.
 	public static function connect($password, $API, $connectionType)
 	{
 		if(self::$fileDebugging > 3 || self::$fileDebugging < 0)
@@ -112,8 +113,11 @@ class CTFA_SAMP
 		}		
 	}
 	
-	public function createUser($email, $cellphone, $areaCode = 1)
-	{	
+	public function createUser($email, $cellphone, $areaCode)
+	{
+		if($areaCode === null)
+			$areaCode = 1;
+			
 		if(!isset($email))
 		{
 			self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->createUser) email is missing.');
