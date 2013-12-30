@@ -16,9 +16,8 @@
 /*
  * Available Functions:
  * - TFASAMP::prepareConnection(host[], password[], api_key[], type[] = "development", bool:debug = false)
- * - TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = 1)
+ * - TFASAMP::createUser(playerid, email[], cellphone[], area_code[] = 1)
  * - TFASAMP::verifyToken(playerid, user_id, token, bool: force = true)
- * - (DEPRECATED - REMOVED AT v1.0.0) TFASAMP::isTokenVerifiedValid(playerid)
  * - TFASAMP::setPlayerUserID(playerid, userid)
  * - TFASAMP::getPlayerUserID(playerid)
  *
@@ -62,9 +61,6 @@ forward public 		TFASAMP::OnTokenVerify(playerid, result);
 /*
  * Variables Declaration
 */
-
-// Backward-compatibility define
-#define 			TFASAMP_verifyTokenTime(%0) TFASAMP_isTokenVerifiedValid(%0)
 
 enum TFASAMP::E_INTERNAL
 {
@@ -202,8 +198,6 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
 	
 	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&type=development", _string);
-	else
-		format(_string, sizeof(_string), "%s&type=production", _string);
 		
 	if(TFASAMP::isDebugActive())
 		printf("(debug) TFASAMP::addUser: '_string' = '%s'", _string);
@@ -238,12 +232,10 @@ stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
 		
 	new _string[1024];
 	
-	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=check&api_key=%s&userid=%d&token=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), user_id, token);
+	format(_string, sizeof(_string), "%sexecute.php?password=%s&command=check&api=%s&userid=%d&token=%s", TFASAMP::getHostname(), TFASAMP::getPassword(), TFASAMP::getAPIKey(), user_id, token);
 	
 	if(!strcmp(TFASAMP::INTERNAL[TYPE], "development"))
 		format(_string, sizeof(_string), "%s&type=development", _string);
-	else
-		format(_string, sizeof(_string), "%s&type=production", _string);
 		
 	if(!force)
 		format(_string, sizeof(_string), "%s&settings[force]=false", _string);
@@ -255,40 +247,6 @@ stock TFASAMP::verifyToken(playerid, user_id, token[], bool: force = true)
 		
 	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_verifyToken_response");
 	return true;
-}
-
-/*
- * TFASAMP::isTokenVerifiedValid
- * This function checks if the token has been verified within 20 seconds and if the user has been verified properly.
- *
- * playerid = playerid of the player you wish to check the token.
- *
- * @returns true if it has been verified within 20 seconds, otherwise it returns false.
-*/
-#pragma deprecated TFASAMP_isTokenVerifiedValid
-stock TFASAMP::isTokenVerifiedValid(playerid)
-{
-	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
-		return print("TFASAMP: The connection is not prepared yet."), false;
-	
-	if(TFASAMP::isDebugActive())
-	{
-		printf("(debug) TFASAMP::isTokenVerifiedValid: 'TOKEN_CHECK_STATUS' = '%d'", TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS]);
-		printf("(debug) TFASAMP::isTokenVerifiedValid: 'LAST_CHECK_UNIX' = '%d'", TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX]);
-		printf("(debug) TFASAMP::isTokenVerifiedValid: 'gettime()-20' = '%d'", gettime()-20);
-	}
-	
-	if(TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] == 1) 
-		if(TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] > (gettime()-20)) 
-			return true;
-		else
-		{
-			TFASAMP::PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
-			TFASAMP::PLAYER[playerid][LAST_CHECK_UNIX] = 0;
-			return false;
-		}
-		
-	return false;
 }
 
 /*
@@ -348,7 +306,7 @@ stock TFASAMP::getPlayerUserID(playerid)
 forward TFASAMP::checkVersion(index, response_code, data[]);
 public TFASAMP::checkVersion(index, response_code, data[])
 {
-	if(strval(data) == 0) 
+	if(strval(data) == 0)
 	{
 		printf("TFASAMP: The include version is outdated. You may download the new version from the link below.");
 		printf("TFASAMP: https://github.com/GiampaoloFalqui/TFA_SAMP/archive/master.zip");

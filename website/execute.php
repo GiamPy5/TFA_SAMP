@@ -20,30 +20,56 @@ if(!isset($_GET['password']))
 
 if(!isset($_GET['api']))
 	die('API key must be sent.');
+
+if(!isset($_GET['command']	))
+	die('A command must be sent.');	
 	
 require_once 'class/tfasamp.php';	
 
-try
+global $TFA_SAMP;
+
+try 
 {
-	CTFA_SAMP::connect($_GET['password'], $_GET['api'], 'production');
+	$args = $_GET + array('type' => null);
+	$TFA_SAMP = CTFA_SAMP::connect($_GET['password'], $_GET['api'], $args['type']);
 }
-catch(Exception $error)
+catch(Exception $connectError) 
 {
-	echo $error->getMessage();
+	echo $connectError->getMessage();
+	exit;
 }
 
 switch($_GET['command'])
 {
 	case 'create': 
 	{
-		$TFA_SAMP->createUser($_GET['email'], $_GET['cellphone'], $_GET['area_code']);
+		try 
+		{
+			$args = $_GET + array('email' => null, 'cellphone' => null, 'area_code' => null);
+			$TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code']);
+		}
+		catch(Exception $createError)
+		{
+			echo $createError->getMessage();
+		}
+		
 		break;
 	}
 	case 'check':
 	{
-		$TFA_SAMP->verifyToken($_GET['userid'], $_GET['token'], $_GET['settings']);
+		try
+		{
+			$args = $_GET + array('userid' => null, 'token' => null, 'settings' => null);
+			$TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings']);
+		}
+		catch(Exception $checkError)
+		{
+			echo $checkError->getMessage();
+		}
+		
 		break;
 	}
 	
-	default: die('Invalid command.');
+	default: 
+		die('Invalid command.');
 }
