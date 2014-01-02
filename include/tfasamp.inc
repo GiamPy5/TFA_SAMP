@@ -15,7 +15,7 @@
 
 /*
  * Available Functions:
- * - TFASAMP::prepareConnection(host[], password[], api_key[], type[] = "development", bool:debug = false)
+ * - TFASAMP::prepareConnection(host[], password[], api_key[], type[] = "development", bool:tfa_debug = false)
  * - TFASAMP::createUser(playerid, email[], cellphone[], area_code[] = 1)
  * - TFASAMP::verifyToken(playerid, user_id, token, bool: force = true)
  * - TFASAMP::setPlayerUserID(playerid, userid)
@@ -42,7 +42,7 @@ forward public 		TFASAMP::OnTokenVerify(playerid, result);
  * Versioning
 */
 
-#define 			TFASAMP_VERSION				"1.0.0-beta"
+#define 			TFASAMP_VERSION				"1.0.0"
 
 /*
  * Macros
@@ -173,7 +173,7 @@ stock TFASAMP::prepareConnection(hostname[], password[], api_key[], type[] = "de
 }
 
 /*
- * TFASAMP::addUser
+ * TFASAMP::createUser
  * This function adds a new user to your Authy application.
  *
  * playerid = playerid of the player you wish to add in your Authy application.
@@ -182,9 +182,9 @@ stock TFASAMP::prepareConnection(hostname[], password[], api_key[], type[] = "de
  * area_code[] = International cellphone number prefix - you may find them at www.countrycode.org under the 'Country Code' column.
  *
  * @returns true if the function has been properly executed, false if not.
- * Notes: the callback TFASAMP::addUser_response will give you the userid of the player to be used for the token verification.
+ * Notes: the callback TFASAMP::createUser_response will give you the userid of the player to be used for the token verification.
 */
-stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1") 
+stock TFASAMP::createUser(playerid, email[], cellphone[], area_code[] = "1") 
 {
 	if(!TFASAMP::INTERNAL[CONNECTION_PREPARED])
 		return print("TFASAMP: The connection is not prepared yet."), false;
@@ -200,11 +200,11 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
 		format(_string, sizeof(_string), "%s&type=development", _string);
 		
 	if(TFASAMP::isDebugActive())
-		printf("(debug) TFASAMP::addUser: '_string' = '%s'", _string);
+		printf("(debug) TFASAMP::createUser: '_string' = '%s'", _string);
 	
 	TFASAMP::PLAYER[playerid][IS_HTTP_PROCESSING] = true;
 	
-	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_addUser_response");
+	HTTP(playerid, HTTP_GET, _string, "", "TFASAMP_createUser_response");
 	return true;
 }
 
@@ -213,7 +213,7 @@ stock TFASAMP::addUser(playerid, email[], cellphone[], area_code[] = "1")
  * This function checks a token if valid or invalid.
  *
  * playerid = playerid of the player you wish to check the token.
- * user_id[] = userid of the player you wish to check the token (check TFASAMP::addUser_response or your Authy's dashboard for clarifications).
+ * user_id[] = userid of the player you wish to check the token (check TFASAMP::createUser_response or your Authy's dashboard for clarifications).
  * token[] = token to be checked.
  * force[] (bool: true) = It's recommended to leave this true. If user has not finished registration any token always works.
  *
@@ -314,14 +314,14 @@ public TFASAMP::checkVersion(index, response_code, data[])
 	return 1;
 }
 
-forward TFASAMP::addUser_response(index, response_code, data[]);
-public TFASAMP::addUser_response(index, response_code, data[])
+forward TFASAMP::createUser_response(index, response_code, data[]);
+public TFASAMP::createUser_response(index, response_code, data[])
 {
 	if(TFASAMP::isDebugActive())
 	{
-		printf("(debug) TFASAMP::addUser_response: 'index' = '%d'", index);
-		printf("(debug) TFASAMP::addUser_response: 'response_code' = '%d'", response_code);
-		printf("(debug) TFASAMP::addUser_response: 'data' = '%s'", data);
+		printf("(debug) TFASAMP::createUser_response: 'index' = '%d'", index);
+		printf("(debug) TFASAMP::createUser_response: 'response_code' = '%d'", response_code);
+		printf("(debug) TFASAMP::createUser_response: 'data' = '%s'", data);
 	}
 	
 	TFASAMP::PLAYER[index][IS_HTTP_PROCESSING] = false;
