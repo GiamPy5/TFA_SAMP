@@ -154,26 +154,26 @@ class CTFA_SAMP
       
     if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARTDED_FOR'] != '') {
       self::$__userIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    	if(! in_array(self::$__userIP, self::$__allowedAddress)) {
+      if(! in_array(self::$__userIP, self::$__allowedAddress)) {
         self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
         throw new InvalidArgumentException("(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
-    	}
+      }
     } else {
       self::$__userIP = $_SERVER['REMOTE_ADDR'];
-    	if(! in_array(self::$__userIP, self::$__allowedAddress)) {		          
-    		self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) Address ({$_SERVER["REMOTE_ADDR"]}) not allowed.");
-    		throw new InvalidArgumentException("(CTFA_SAMP::connect) Address ({$_SERVER["REMOTE_ADDR"]}) not allowed.");
-    	}
+      if(! in_array(self::$__userIP, self::$__allowedAddress)) {	  		          
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) Address ({$_SERVER["REMOTE_ADDR"]}) not allowed.");
+        throw new InvalidArgumentException("(CTFA_SAMP::connect) Address ({$_SERVER["REMOTE_ADDR"]}) not allowed.");
+      }
     }
     
     if(! $password) {
-    	self::logAction(reportingLevel::ERROR, '(CTFA_SAMP::connect) password is missing.');
-    	throw new BadFunctionCallException('(CTFA_SAMP::connect) password is missing.');
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP::connect) password is missing.');
+      throw new BadFunctionCallException('(CTFA_SAMP::connect) password is missing.');
     }
     
     if($password != self::$__allowedPassword) {
-    	self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) password ({$password}) is invalid.");
-    	throw new InvalidArgumentException("(CTFA_SAMP::connect) password ({$password}) is invalid.");
+      self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) password ({$password}) is invalid.");
+      throw new InvalidArgumentException("(CTFA_SAMP::connect) password ({$password}) is invalid.");
     }
     
     if($connectionType === null) {
@@ -181,18 +181,18 @@ class CTFA_SAMP
     }    
     
     switch($connectionType) {
-    	case 'production': {
+      case 'production': {
         self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through production connection type.');
         return new CTFA_SAMP($password, $API, 'https://api.authy.com');
-    	}					
-    	case 'development': {
+      }					
+      case 'development': {
         self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through development connection type.');
         return new CTFA_SAMP($password, $API, 'http://sandbox-api.authy.com');
-    	}			
-    	default: {
+      }			
+      default: {
         self::logAction(reportingLevel::ERROR, "(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
         throw new BadFunctionCallException("(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
-    	}
+      }
     }		
   }
 	
@@ -213,26 +213,26 @@ class CTFA_SAMP
    */
   public function createUser($email, $cellphone, $areaCode = 1, $returnType = 'raw') {			
     if(! $email) {
-    	self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->createUser) email is missing.');
-    	throw new InvalidArgumentException('(CTFA_SAMP->createUser) email is missing.');
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->createUser) email is missing.');
+      throw new InvalidArgumentException('(CTFA_SAMP->createUser) email is missing.');
     }
     
     if(! $cellphone) {
-    	self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->createUser) cellphone is missing.');
-    	throw new InvalidArgumentException('(CTFA_SAMP->createUser) cellphone is missing.');
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->createUser) cellphone is missing.');
+      throw new InvalidArgumentException('(CTFA_SAMP->createUser) cellphone is missing.');
     }
     
     $authyLibrary = new Authy_Api($this->__API, $this->__connectionURL);
     $requestResult = $authyLibrary->registerUser($email, $cellphone, intval($areaCode));
-    
+
     $result = null;   
     if($requestResult->ok()) {
-    	self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->createUser) user created [mail: '{$email}' - cellphone: '{$cellphone}' - areacode: '{$areaCode}' - id: '{$requestResult->id()}']");
-    	$result['userid'] = $requestResult->id();
+      self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->createUser) user created [mail: '{$email}' - cellphone: '{$cellphone}' - areacode: '{$areaCode}' - id: '{$requestResult->id()}']");
+      $result['userid'] = $requestResult->id();
     } else {
-    	foreach($requestResult->errors() as $field => $message) {
+      foreach($requestResult->errors() as $field => $message) {
         self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->createUser) {$field} = {$message}");
-    	}
+      }
       $result = $requestResult->errors();
     }
     
@@ -267,7 +267,7 @@ class CTFA_SAMP
     }
     	
     if(! $token) {
-    	self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->verifyToken) email is missing.');
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->verifyToken) email is missing.');
       throw new InvalidArgumentException('(CTFA_SAMP->verifyToken) token is missing.');
     }
     
@@ -277,16 +277,16 @@ class CTFA_SAMP
     	
     $authyLibrary = new Authy_Api($this->__API, $this->__connectionURL);
     $requestResult = $authyLibrary->verifyToken(intval($userID), intval($token), $settings);
-    
+
     $result = null;
     if($requestResult->ok()) {
       self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->verifyToken) token verified successfully [userid: {$userID} - token: {$token}]");
       $result['result'] = 'success'; 
     } else {
-    	foreach($requestResult->errors() as $field => $message) {
+      foreach($requestResult->errors() as $field => $message) {
         self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->verifyToken) {$field} = {$message}");
-    	}
-      $result = $requestResult->errors();     
+      }
+      $result = $requestResult->errors();
     }
     
     if ($returnType === 'json') {
@@ -313,21 +313,21 @@ class CTFA_SAMP
     }	  
     
     if($reportingLevel > self::$__fileDebugging) {
-    	return false;
+      return false;
     }
     
     $time = date('r', time());
     $IP = self::$__userIP;
-    
+
     switch($reportingLevel) {
-    	case reportingLevel::NOTICE: {
+      case reportingLevel::NOTICE: {
         file_put_contents(self::$__logFile, "[NOTICE - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
         return true;
-    	}				
-    	case reportingLevel::ERROR: {
+      }				
+      case reportingLevel::ERROR: {
         file_put_contents(self::$__logFile, "[ERROR - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
         return true;
-    	}				
+      }				
     }
     
     return false;
