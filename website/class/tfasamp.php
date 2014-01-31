@@ -17,7 +17,7 @@
  * @copyright     Copyright (C) 2014 Giampaolo Falqui (https://github.com/GiampaoloFalqui/TFA_SAMP)
  * @link          https://github.com/GiampaoloFalqui/TFA_SAMP TFA_SAMP
  * @version       1.1.0
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ * @license       http://opensource.org/licenses/GPL-2.0 GNU License
  */
 
 require_once 'Authy/Authy.php';
