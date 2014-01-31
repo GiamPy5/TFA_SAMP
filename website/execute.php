@@ -16,35 +16,31 @@
 */
 
 if(!isset($_GET['password']))
-	die('Password must be sent.');
+  die('Password must be sent.');
 
 if(!isset($_GET['api']))
-	die('API key must be sent.');
+  die('API key must be sent.');
 
 if(!isset($_GET['command']	))
-	die('A command must be sent.');	
+  die('A command must be sent.');	
 	
 require_once 'class/tfasamp.php';	
 
 $TFA_SAMP = null;
 
-try 
-{
-	$args = $_GET + array('type' => null);
-	$TFA_SAMP = CTFA_SAMP::connect($_GET['password'], $_GET['api'], $args['type']);
+try {
+  $args = $_GET + array('type' => null);
+  $TFA_SAMP = CTFA_SAMP::connect($_GET['password'], $_GET['api'], $args['type']);
 }
 catch(Exception $connectError) 
 {
-	echo $connectError->getMessage();
-	exit;
+  echo $connectError->getMessage();
+  exit;
 }
 
-switch($_GET['command'])
-{
-	case 'create': 
-	{
-		try 
-		{
+switch($_GET['command']) {
+  case 'create': {
+    try {
 			$args = $_GET + array('email' => null, 'cellphone' => null, 'area_code' => null);
       
       /** 
@@ -64,19 +60,15 @@ switch($_GET['command'])
       if ($result) {
         echo $result;
       }              
-		}
-		catch(Exception $createError)
-		{
+		} catch(Exception $createError) {
 			echo $createError->getMessage();
-		}
-		
+		}	
 		break;
 	}
-	case 'check':
-	{
-		try
-		{
-			$args = $_GET + array('userid' => null, 'token' => null, 'settings' => null);
+  
+  case 'check': {
+    try {
+      $args = $_GET + array('userid' => null, 'token' => null, 'settings' => null);
       
       /** 
        * This is a demonstration of how it should work with the 'raw' return type.
@@ -96,15 +88,11 @@ switch($_GET['command'])
         echo $result;
       }      
       
-		}
-		catch(Exception $checkError)
-		{
+		} catch(Exception $checkError) {
 			echo $checkError->getMessage();
-		}
-		
+		}		
 		break;
 	}
 	
-	default: 
-		die('Invalid command.');
+	default: die('Invalid command.');
 }
