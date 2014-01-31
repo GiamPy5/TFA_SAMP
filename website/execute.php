@@ -26,7 +26,7 @@ if(!isset($_GET['command']	))
 	
 require_once 'class/tfasamp.php';	
 
-global $TFA_SAMP;
+$TFA_SAMP = null;
 
 try 
 {
@@ -46,7 +46,24 @@ switch($_GET['command'])
 		try 
 		{
 			$args = $_GET + array('email' => null, 'cellphone' => null, 'area_code' => null);
-			$TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code']);
+      
+      /** 
+       * This is a demonstration of how it should work with the 'raw' return type.
+       */      
+      $result = $TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code'], 'raw');
+      if ($result) {
+        foreach($result as $key => $value) {
+          echo "{$key} => {$value}";
+        }
+      }
+      
+      /** 
+       * This is a demonstration of how it should work with the 'json' return type.
+       */ 
+      $result = $TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code'], 'json');
+      if ($result) {
+        echo $result;
+      }              
 		}
 		catch(Exception $createError)
 		{
@@ -60,7 +77,25 @@ switch($_GET['command'])
 		try
 		{
 			$args = $_GET + array('userid' => null, 'token' => null, 'settings' => null);
-			$TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings']);
+      
+      /** 
+       * This is a demonstration of how it should work with the 'raw' return type.
+       */
+			$result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'raw');
+			if ($result) {
+        foreach($result as $key => $value) {
+          echo "{$key} => {$value}";
+        }
+			}
+      
+      /** 
+       * This is a demonstration of how it should work with the 'json' return type.
+       */      
+      $result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'json');
+      if ($result) {
+        echo $result;
+      }      
+      
 		}
 		catch(Exception $checkError)
 		{
