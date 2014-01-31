@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * The first Two-Factor Authentication Method for San Andreas Multiplayer.
  * Copyright (C) 2013 Giampaolo Falqui
  *
@@ -13,15 +13,20 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of  
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-*/
+ * 
+ * @copyright     Copyright (C) 2014 Giampaolo Falqui (https://github.com/GiampaoloFalqui/TFA_SAMP)
+ * @link          https://github.com/GiampaoloFalqui/TFA_SAMP TFA_SAMP
+ * @version       1.1.0
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ */
 
-if(!isset($_GET['password']))
+if(! isset($_GET['password']))
   die('Password must be sent.');
 
-if(!isset($_GET['api']))
+if(! isset($_GET['api']))
   die('API key must be sent.');
 
-if(!isset($_GET['command']))
+if(! isset($_GET['command']))
   die('A command must be sent.');	
 	
 require_once 'class/tfasamp.php';	
