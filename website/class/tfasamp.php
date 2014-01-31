@@ -32,7 +32,7 @@ abstract class reportingLevel
    * 
    * @var integer
    */
-	const NONE = 0;
+  const NONE = 0;
     
   /**
    * It reports only errors of the system.
@@ -51,7 +51,7 @@ abstract class reportingLevel
 
 class CTFA_SAMP 
 { 
-	/** 
+  /** 
    * This is the password required to communicate with TFA_SAMP.
    * 
    * @var      string
@@ -67,7 +67,7 @@ class CTFA_SAMP
    */
   private static $__allowedAddress = array('127.0.0.1');
 	
-	/**
+  /**
    * Here you may choose the reportingLevel between: $NONE, $NOTICE and $ERROR. If undefined or invalid, $ERROR will be set as default.
    * 
    * @var      string
@@ -127,9 +127,9 @@ class CTFA_SAMP
    */
   private function __construct($password, $API, $connectionURL)
   {
-  	$this->__password = $password;
-  	$this->__API = $API;
-  	$this->__connectionURL = $connectionURL;
+    $this->__password = $password;
+    $this->__API = $API;
+    $this->__connectionURL = $connectionURL;
   }
 	
   /**
@@ -155,8 +155,8 @@ class CTFA_SAMP
     if(isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARTDED_FOR'] != '') {
       self::$__userIP = $_SERVER['HTTP_X_FORWARDED_FOR'];
     	if(! in_array(self::$__userIP, self::$__allowedAddress)) {
-    		self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
-    		throw new InvalidArgumentException("(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
+        throw new InvalidArgumentException("(CTFA_SAMP::connect) Address ({$_SERVER["HTTP_X_FORWARDED_FOR"]}) not allowed.");
     	}
     } else {
       self::$__userIP = $_SERVER['REMOTE_ADDR'];
@@ -182,16 +182,16 @@ class CTFA_SAMP
     
     switch($connectionType) {
     	case 'production': {
-    		self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through production connection type.');
-    		return new CTFA_SAMP($password, $API, 'https://api.authy.com');
+        self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through production connection type.');
+        return new CTFA_SAMP($password, $API, 'https://api.authy.com');
     	}					
     	case 'development': {
-    		self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through development connection type.');
-    		return new CTFA_SAMP($password, $API, 'http://sandbox-api.authy.com');
+        self::logAction(reportingLevel::NOTICE, '(TFASAMP::connect) Connected through development connection type.');
+        return new CTFA_SAMP($password, $API, 'http://sandbox-api.authy.com');
     	}			
     	default: {
-    		self::logAction(reportingLevel::ERROR, "(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
-    		throw new BadFunctionCallException("(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
+        self::logAction(reportingLevel::ERROR, "(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
+        throw new BadFunctionCallException("(TFASAMP::connect) Connection type ({$connectionType}) is invalid: must be 'production' or 'development'.");
     	}
     }		
   }
@@ -231,7 +231,7 @@ class CTFA_SAMP
     	$result['userid'] = $requestResult->id();
     } else {
     	foreach($requestResult->errors() as $field => $message) {
-    		self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->createUser) {$field} = {$message}");
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->createUser) {$field} = {$message}");
     	}
       $result = $requestResult->errors();
     }
@@ -280,11 +280,11 @@ class CTFA_SAMP
     
     $result = null;
     if($requestResult->ok()) {
-    	self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->verifyToken) token verified successfully [userid: {$userID} - token: {$token}]");
+      self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->verifyToken) token verified successfully [userid: {$userID} - token: {$token}]");
       $result['result'] = 'success'; 
     } else {
     	foreach($requestResult->errors() as $field => $message) {
-    		self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->verifyToken) {$field} = {$message}");
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->verifyToken) {$field} = {$message}");
     	}
       $result = $requestResult->errors();     
     }
@@ -321,12 +321,12 @@ class CTFA_SAMP
     
     switch($reportingLevel) {
     	case reportingLevel::NOTICE: {
-    		file_put_contents(self::$__logFile, "[NOTICE - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
-    		return true;
+        file_put_contents(self::$__logFile, "[NOTICE - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
+        return true;
     	}				
     	case reportingLevel::ERROR: {
-    		file_put_contents(self::$__logFile, "[ERROR - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
-    		return true;
+        file_put_contents(self::$__logFile, "[ERROR - {$time} - {$IP}] {$text}\r\n", FILE_APPEND);
+        return true;
     	}				
     }
     
