@@ -21,7 +21,7 @@ if(!isset($_GET['password']))
 if(!isset($_GET['api']))
   die('API key must be sent.');
 
-if(!isset($_GET['command']	))
+if(!isset($_GET['command']))
   die('A command must be sent.');	
 	
 require_once 'class/tfasamp.php';	
@@ -31,9 +31,7 @@ $TFA_SAMP = null;
 try {
   $args = $_GET + array('type' => null);
   $TFA_SAMP = CTFA_SAMP::connect($_GET['password'], $_GET['api'], $args['type']);
-}
-catch(Exception $connectError) 
-{
+} catch(Exception $connectError) {
   echo $connectError->getMessage();
   exit;
 }
@@ -41,7 +39,7 @@ catch(Exception $connectError)
 switch($_GET['command']) {
   case 'create': {
     try {
-			$args = $_GET + array('email' => null, 'cellphone' => null, 'area_code' => null);
+      $args = $_GET + array('email' => null, 'cellphone' => null, 'area_code' => null);
       
       /** 
        * This is a demonstration of how it should work with the 'raw' return type.
@@ -60,11 +58,12 @@ switch($_GET['command']) {
       if ($result) {
         echo $result;
       }              
-		} catch(Exception $createError) {
-			echo $createError->getMessage();
-		}	
-		break;
-	}
+      
+    } catch(Exception $createError) {
+      echo $createError->getMessage();
+    }	
+    break;
+  }
   
   case 'check': {
     try {
@@ -73,12 +72,12 @@ switch($_GET['command']) {
       /** 
        * This is a demonstration of how it should work with the 'raw' return type.
        */
-			$result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'raw');
-			if ($result) {
+      $result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'raw');
+      if ($result) {
         foreach($result as $key => $value) {
           echo "{$key} => {$value}";
         }
-			}
+      }
       
       /** 
        * This is a demonstration of how it should work with the 'json' return type.
@@ -88,11 +87,11 @@ switch($_GET['command']) {
         echo $result;
       }      
       
-		} catch(Exception $checkError) {
-			echo $checkError->getMessage();
-		}		
-		break;
-	}
+    } catch(Exception $checkError) {
+      echo $checkError->getMessage();
+    }		
+    break;
+  }
 	
-	default: die('Invalid command.');
+  default: die('Invalid command.');
 }
