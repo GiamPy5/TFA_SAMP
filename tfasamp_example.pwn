@@ -4,11 +4,11 @@
 main() {}
 
 #define 	DIALOG_SELECT_USERID	1000
-#define 	DIALOG_VERIFY_TOKEN		1001
+#define 	DIALOG_VERIFY_TOKEN	    1001
 
 public OnGameModeInit()
 {
-	TFASAMP::prepareConnection("hosting", "password", "apikey", "production", true);
+	TFASAMP_prepareConnection("hosting", "password", "apikey", "production", true);
 	return 1;
 }
 
@@ -26,7 +26,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, 000000, "{FFFFFF}You have written your Authy's user id.");
 			
-			TFASAMP::setPlayerUserID(playerid, strval(inputtext));
+			TFASAMP_setPlayerUserID(playerid, strval(inputtext));
 			
 			ShowPlayerDialog(playerid, DIALOG_VERIFY_TOKEN, DIALOG_STYLE_INPUT, "Insert TOKEN", "This is a testing dialog. This phase should be voided for production gamemodes.\nInsert the TOKEN:", "Verify", "");	
 			return true;
@@ -36,7 +36,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			SendClientMessage(playerid, 000000, "{FFFFFF}Loading..");
 			
-			TFASAMP::verifyToken(playerid, TFASAMP::getPlayerUserID(playerid), inputtext);
+			TFASAMP_verifyToken(playerid, TFASAMP_getPlayerUserID(playerid), inputtext);
 			return true;
 		}		
 	}
@@ -44,10 +44,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return false;
 }
 
-public TFASAMP::OnTokenVerify(playerid, result) 
+public TFASAMP_OnTokenVerify(playerid, result) 
 {
-	if(result == 1)
+	if (result == 1) {
 		SendClientMessage(playerid, 000000, "{FFFFFF}The token was valid!");
-	else
+    } else {
 		SendClientMessage(playerid, 000000, "{FF0000}The token was invalid!");
+    }
 }
