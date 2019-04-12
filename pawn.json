@@ -1,0 +1,9 @@
+{
+	"user": "GiampaoloFalqui",
+	"repo": "TFA_SAMP",
+	"entry": "tfasamp.pwn",
+	"output": "tfasamp.amx",
+	"dependencies": [
+		"sampctl/samp-stdlib"
+	]
+}
