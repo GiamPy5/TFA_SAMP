@@ -46,12 +46,7 @@ https://github.com/authy/authy-php
 
 ## Usage
 
-<!--
-Write your code documentation or examples here. If your library is documented in
-the source code, direct users there. If not, list your API and describe it well
-in this section. If your library is passive and has no API, simply omit this
-section.
--->
+Check out the [example file](https://github.com/GiampaoloFalqui/TFA_SAMP/blob/master/tfasamp_example.pwn).
 
 ## Testing
 
