@@ -44,10 +44,6 @@ Include in your code and begin using the library:
 
 https://github.com/authy/authy-php
 
-http://forum.sa-mp.com/showthread.php?t=169354
-
-http://forum.sa-mp.com/showthread.php?t=166016
-
 ## Usage
 
 <!--
