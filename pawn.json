@@ -4,6 +4,7 @@
 	"entry": "tfasamp.pwn",
 	"output": "tfasamp.amx",
 	"dependencies": [
-		"sampctl/samp-stdlib"
+		"sampctl/samp-stdlib",
+		"pawn-lang/YSI-Includes"
 	]
 }
