@@ -37,7 +37,7 @@ sampctl package install GiampaoloFalqui/TFA_SAMP
 Include in your code and begin using the library:
 
 ```pawn
-#include <TFA_SAMP>
+#include <tfasamp>
 ```
 
 ## Additional Requirements
