@@ -20,9 +20,14 @@
  * - TFASAMP_verifyToken(playerid, user_id, token, bool: force = true)
  * - TFASAMP_setPlayerUserID(playerid, userid)
  * - TFASAMP_getPlayerUserID(playerid)
+ * - TFASAMP_getUUID(playerid)
+ * - TFASAMP_setUUID(playerid, TFA_UUID:uuid[])
+ * - TFASAMP_getNotification(playerid, TFA_UUID:uuid[])
  *
  * Available Callbacks:
  * - TFASAMP_OnTokenVerify(playerid, result)
+ * - TFASAMP_OnPushNotification(playerid, TFA_UUID:uuid[])
+ * - TFASAMP_OnCheckNotification(playerid, status)
 */
 
 /*
@@ -33,9 +38,11 @@
 #include			<a_http>
 #include			<YSI\y_stringhash>
 #include			<YSI\y_hooks>
+#include            <a_json>
 
 forward public 		TFASAMP_OnTokenVerify(playerid, result);
-
+forward public      TFASAMP_OnPushNotification(playerid, TFA_UUID:uuid[]);
+forward public      TFASAMP_OnCheckNotification(playerid, status);
 /*
  * Versioning
 */
@@ -57,6 +64,11 @@ forward public 		TFASAMP_OnTokenVerify(playerid, result);
 #define 			TFASAMP_isDebugActive()		TFASAMP_INTERNAL[DEBUG_STATUS]
 
 /*
+	UUID's size 
+*/
+#define  MAX_UUID_SIZE 60
+
+/*
  * Variables Declaration
 */
 
@@ -75,6 +87,7 @@ enum TFASAMP_E_PLAYER
 	AUTHY_USER_ID,
 	TOKEN_CHECK_STATUS,
 	LAST_CHECK_UNIX,
+	AUTHY_UUID[MAX_UUID_SIZE],
 	bool: IS_HTTP_PROCESSING,
 };
 
@@ -87,6 +100,7 @@ hook OnPlayerConnect(playerid)
 	TFASAMP_PLAYER[playerid][AUTHY_USER_ID] = 0;
 	TFASAMP_PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
 	TFASAMP_PLAYER[playerid][LAST_CHECK_UNIX] = 0;
+	format(TFASAMP_PLAYER[playerid][AUTHY_UUID], MAX_UUID_SIZE, "");
 	TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = false;
 	return 1;
 }
@@ -96,6 +110,7 @@ hook OnPlayerDisconnect(playerid, reason)
 	TFASAMP_PLAYER[playerid][AUTHY_USER_ID] = 0;
 	TFASAMP_PLAYER[playerid][TOKEN_CHECK_STATUS] = 0;
 	TFASAMP_PLAYER[playerid][LAST_CHECK_UNIX] = 0;
+	format(TFASAMP_PLAYER[playerid][AUTHY_UUID], MAX_UUID_SIZE, "");
 	TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = false;
 	return 1;
 }
@@ -243,6 +258,66 @@ stock TFASAMP_verifyToken(playerid, user_id, token[], bool: force = true)
 }
 
 /*
+ * TFASAMP_pushNotification
+ * This function sends a notification to the client's device for authorization
+ *
+ * playerid             = playerid of the player you wish to check the token.
+ * user_id 			    = userid of the player you wish to check the token (check TFASAMP_createUser_response or your Authy's dashboard for clarifications).
+ *
+ * @returns true if the function has been properly executed, false if not. 
+ * Notes: This function will trigger the callback TFASAMP_OnPushNotification.
+ * Notes: the callback TFASAMP_pushNotification will give you the UUID of the notification which can be used to check the status of the approval later via TFASAMP_getNotification()
+ * Notes: check function TFASAMP_getNotification for clarification as to where the UUID needs to be used
+*/
+
+stock TFASAMP_pushNotification(playerid, user_id){
+
+    if (!TFASAMP_INTERNAL[CONNECTION_PREPARED]) {
+		return print("TFASAMP: The connection is not prepared yet."), false;
+	}
+
+	if (TFASAMP_isHTTPProcessing(playerid)) {
+		return printf("TFASAMP: playerid %d has already an API request in progress, wait please.", playerid), false;
+	}
+
+	new	string[1024];
+	format(string, sizeof string, "%sexecute.php?password=%s&command=pushNoti&api=%s&userid=%d", TFASAMP_getHostname(), TFASAMP_getPassword(), TFASAMP_getAPIKey(), user_id);
+
+    TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = true;
+   	HTTP(playerid, HTTP_GET, string, "", "TFA_push_response");
+   	return true;
+}
+
+/*
+ * TFASAMP_getNotification
+ * This function gets the status of the notification which was sent to the client's device
+ *
+ * playerid             = playerid of the player you wish to check the token.
+ * uuid 			    = uuid of the player (check TFASAMP_pushNotification, when used the callback TFASAMP_OnPushNotification will return TFA_UUID tagged value)
+ *
+ * @returns true if the function has been properly executed, false if not.
+ * Notes: the callback TFASAMP_OnGetNotification will @return true if the authorization has been approved otherwise false if not or failed.
+*/
+
+stock TFASAMP_getNotification(playerid, TFA_UUID:uuid[]){
+
+    if (!TFASAMP_INTERNAL[CONNECTION_PREPARED]) {
+		return print("TFASAMP: The connection is not prepared yet."), false;
+	}
+
+	if (TFASAMP_isHTTPProcessing(playerid)) {
+		return printf("TFASAMP: playerid %d has already an API request in progress, wait please.", playerid), false;
+	}
+
+	new	string[1024];
+	format(string, sizeof string, "%sexecute.php?password=%s&command=checkNoti&api=%s&uuid=%s", TFASAMP_getHostname(), TFASAMP_getPassword(), TFASAMP_getAPIKey(), _:uuid);
+
+    TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = true;
+   	HTTP(playerid, HTTP_GET, string, "", "TFA_check_response");
+   	return 1;
+}
+
+/*
  * TFASAMP_isHTTPProcessing
  * This function checks if the HTTP server is still processing the request.
  *
@@ -295,6 +370,16 @@ stock TFASAMP_getPlayerUserID(playerid)
 	return TFASAMP_PLAYER[playerid][AUTHY_USER_ID];
 }
 
+stock TFASAMP_setUUID(playerid, TFA_UUID:_uuid[]){
+	format(TFASAMP_PLAYER[playerid][AUTHY_UUID], MAX_UUID_SIZE, "%s", _:_uuid);
+	return 1;
+}
+
+stock TFASAMP_getUUID(playerid, TFA_UUID:uuid_[], size = MAX_UUID_SIZE){
+	strmid(_:uuid_, TFASAMP_PLAYER[playerid][AUTHY_UUID], 0, size, size);
+	return 1;
+}
+
 forward TFASAMP_createUser_response(index, response_code, data[]);
 public TFASAMP_createUser_response(index, response_code, data[])
 {
@@ -305,14 +390,16 @@ public TFASAMP_createUser_response(index, response_code, data[])
 	}
 	
 	TFASAMP_PLAYER[index][IS_HTTP_PROCESSING] = false;
+
+	new JSONNode:jsonData;
+	jsonData = json_parse_string(data);
+	new result;
+	result = json_get_int(jsonData, "userid");
 	
-    if (!TFASAMP_IsNumeric(data)) {
-		return printf("TFASAMP ERROR: %s", data), false;
-	} else {
-		TFASAMP_PLAYER[index][AUTHY_USER_ID] = strval(data);	
+	if(!result){
+		printf("(ERROR) TFASAMP_createUser_response: User not created!");
 	}
-	
-	return 1;
+	return result;
 }
 
 forward TFASAMP_verifyToken_response(index, response_code, data[]);
@@ -326,24 +413,71 @@ public TFASAMP_verifyToken_response(index, response_code, data[])
 	
 	TFASAMP_PLAYER[index][IS_HTTP_PROCESSING] = false;
 	
-    if (!TFASAMP_IsNumeric(data)) {
-		return printf("TFASAMP ERROR: %s", data), false;
-	} else  {
-		CallLocalFunction("TFASAMP_OnTokenVerify", "dd", index, strval(data));
+	new JSONNode:jsonData;
+	jsonData = json_parse_string(data);
+	new result[15];
+	json_get_string(jsonData, result, sizeof result, "success");
+
+	if(!strcmp(result, "true", true) && !isnull(result)){
+   		CallLocalFunction("TFASAMP_OnTokenVerify", "dd", index, 1);
 		TFASAMP_PLAYER[index][LAST_CHECK_UNIX] = gettime();
-		TFASAMP_PLAYER[index][TOKEN_CHECK_STATUS] = strval(data);
+		TFASAMP_PLAYER[index][TOKEN_CHECK_STATUS] = 1;
+	}
+	else{
+		CallLocalFunction("TFASAMP_OnTokenVerify", "dd", index, 0);
+	    printf("TFASAMP ERROR: %s", data);
+	    TFASAMP_PLAYER[index][TOKEN_CHECK_STATUS] = 0;
+	    return 0;
 	}
 
 	return 1;
 }
 
-stock TFASAMP_IsNumeric(const string[])
-{
-    for (new i = 0, j = strlen(string); i < j; i++) {
-        if (string[i] > '9' || string[i] < '0') {
-            return 0;
-        }
-    }
-	
-    return 1;
+forward TFA_push_response(index, response_code, data[]);
+public TFA_push_response(index, response_code, data[]){
+
+	if(TFASAMP_isDebugActive()) {
+		printf("(debug) TFA_push_response: 'index' = '%d'", index);
+		printf("(debug) TFA_push_response: 'response_code' = '%d'", response_code);
+		printf("(debug) TFA_push_response: 'data' = '%s'", data);
+	}
+
+	TFASAMP_PLAYER[index][IS_HTTP_PROCESSING] = false;
+
+	new JSONNode:jsonData;
+	jsonData = json_parse_string(data);
+	new result[128];
+	json_get_string(jsonData, result, sizeof result, "success");
+
+	if(!strcmp(result, "true", true)){
+       	json_get_string(jsonData, result, sizeof result, "uuid");
+		CallLocalFunction("TFASAMP_OnPushNotification", "ds", index, result);
+	}
+	else{
+		CallLocalFunction("TFASAMP_OnPushNotification", "ds", index, "NULL");
+	}
+}
+
+forward TFA_check_response(index, response_code, data[]);
+public TFA_check_response(index, response_code, data[]){
+
+	if(TFASAMP_isDebugActive()) {
+		printf("(debug) TFA_check_response: 'index' = '%d'", index);
+		printf("(debug) TFA_check_response: 'response_code' = '%d'", response_code);
+		printf("(debug) TFA_check_response: 'data' = '%s'", data);
+	}
+
+	TFASAMP_PLAYER[index][IS_HTTP_PROCESSING] = false;
+
+	new JSONNode:jsonData;
+	jsonData = json_parse_string(data);
+	new result[128];
+	json_get_string(jsonData, result, sizeof result, "status");
+
+	if(!strcmp(result, "approved", true)){
+		CallLocalFunction("TFASAMP_OnCheckNotification", "dd", index, 1);
+	}
+	else{
+		CallLocalFunction("TFASAMP_OnCheckNotification", "dd", index, 0);
+	}
 }
