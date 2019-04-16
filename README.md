@@ -43,6 +43,7 @@ Include in your code and begin using the library:
 ## Additional Requirements
 
 https://github.com/authy/authy-php
+
 https://github.com/Hual/SAMPSON
 
 
