@@ -15,7 +15,7 @@ main() {}
 
 public OnGameModeInit()
 {
-    TFASAMP_prepareConnection("localhost/", "testing", "zsMK5YGv7ITFJM4REkcZzuedcpGxBKKe", "production", true);
+    TFASAMP_prepareConnection("localhost/", "testing", "api_key", "production", true);
     
     return 1;
 }
