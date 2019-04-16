@@ -228,12 +228,13 @@ class CTFA_SAMP
     $result = null;   
     if($requestResult->ok()) {
       self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->createUser) user created [mail: '{$email}' - cellphone: '{$cellphone}' - areacode: '{$areaCode}' - id: '{$requestResult->id()}']");
-      $result['userid'] = $requestResult->id();
+      $result['id'] = $requestResult->id();
     } else {
       foreach($requestResult->errors() as $field => $message) {
         self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->createUser) {$field} = {$message}");
       }
       $result = $requestResult->errors();
+      $result->id = 0;
     }
     
     if ($returnType === 'json') {
@@ -242,7 +243,7 @@ class CTFA_SAMP
       }
       return json_encode($result);
     } else {
-      return $result['userid'];
+      return $result;
     }
   }
 	
@@ -281,12 +282,13 @@ class CTFA_SAMP
     $result = null;
     if($requestResult->ok()) {
       self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->verifyToken) token verified successfully [userid: {$userID} - token: {$token}]");
-      $result['result'] = 'success'; 
+      $result['success'] = 'true'; 
     } else {
       foreach($requestResult->errors() as $field => $message) {
         self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->verifyToken) {$field} = {$message}");
-      }
+      }      
       $result = $requestResult->errors();
+      $result->success = "false";
     }
     
     if ($returnType === 'json') {
@@ -297,6 +299,74 @@ class CTFA_SAMP
     } else {
       return $result;
     }
+  }
+
+  public function pushNotification($userID, $message, $opt = array("seconds_to_expire"=>"60")){
+
+    if(! $userID) {
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->pushNotification) userid is missing.');
+      throw new InvalidArgumentException('{"success": "false", "message": "userid is missing"}');
+    }
+      
+    if(! $message) {
+      $message = 'Please do the verification!';
+    }
+
+    $authyLibrary = new Authy_Api($this->__API, $this->__connectionURL);
+    $requestResult = $authyLibrary->createApprovalRequest(intval($userID), $message, $opt);
+
+    $result = null;
+
+    if($requestResult->ok()){
+      self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->pushNotification) created notification successfully [userid: {$userID} - uuid: {$requestResult->bodyvar('approval_request')->uuid}]");
+      $result['uuid'] = $requestResult->bodyvar('approval_request')->uuid;
+      $result['success'] = 'true';
+    }
+    else{
+      foreach($requestResult->errors() as $field => $message) {
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->pushNotification) {$field} = {$message}");
+      }      
+      $result = $requestResult->errors();
+      $result->success = "false";
+    }
+
+    if(version_compare(PHP_VERSION, '5.4.0', '>=')) {
+      return json_encode($result, JSON_PRETTY_PRINT);
+    }
+    else
+      return json_encode($result);
+  }
+
+  public function checkNotification($uuid){
+
+    if(!$uuid){
+      self::logAction(reportingLevel::ERROR, '(CTFA_SAMP->checkNotification) uuid is missing.');
+      throw new InvalidArgumentException('{"status": "NULL", "message": "uuid is missing"}');
+    }
+
+    $authyLibrary = new Authy_Api($this->__API, $this->__connectionURL);
+    $requestResult = $authyLibrary->getApprovalRequest($uuid);
+
+    $result = null;
+
+    if($requestResult->ok()){
+      self::logAction(reportingLevel::NOTICE, "(CTFA_SAMP->checkNotification) checked notification successfully [uuid: {$uuid}");
+      $result['status'] = $requestResult->bodyvar('approval_request')->status;
+    }
+    else{
+      foreach($requestResult->errors() as $field => $message) {
+        self::logAction(reportingLevel::ERROR, "(CTFA_SAMP->checkNotification) {$field} = {$message}");
+      }      
+      $result = $requestResult->errors();
+      $result->status = "NULL";
+    }
+
+    if(version_compare(PHP_VERSION, '5.4.0', '>=')) {
+      return json_encode($result, JSON_PRETTY_PRINT);
+    }
+    else
+      return json_encode($result);
+
   }
 
   /**
