@@ -1,10 +1,11 @@
 {
 	"user": "GiampaoloFalqui",
 	"repo": "TFA_SAMP",
-	"entry": "tfasamp.pwn",
-	"output": "tfasamp.amx",
+	"entry": "tfasamp_example2.pwn",
+	"output": "tfasamp_example2.amx",
 	"dependencies": [
 		"sampctl/samp-stdlib",
-		"pawn-lang/YSI-Includes"
+		"pawn-lang/YSI-Includes",
+		"Hual/SAMPSON"
 	]
 }
