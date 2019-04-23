@@ -284,7 +284,7 @@ stock TFASAMP_pushNotification(playerid, user_id){
 	format(string, sizeof string, "%sexecute.php?password=%s&command=pushNoti&api=%s&userid=%d", TFASAMP_getHostname(), TFASAMP_getPassword(), TFASAMP_getAPIKey(), user_id);
 
     TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = true;
-   	HTTP(playerid, HTTP_GET, string, "", "TFA_push_response");
+   	HTTP(playerid, HTTP_GET, string, "", "TFASAMP_push_response");
    	return true;
 }
 
@@ -313,7 +313,7 @@ stock TFASAMP_getNotification(playerid, TFA_UUID:uuid[]){
 	format(string, sizeof string, "%sexecute.php?password=%s&command=checkNoti&api=%s&uuid=%s", TFASAMP_getHostname(), TFASAMP_getPassword(), TFASAMP_getAPIKey(), _:uuid);
 
     TFASAMP_PLAYER[playerid][IS_HTTP_PROCESSING] = true;
-   	HTTP(playerid, HTTP_GET, string, "", "TFA_check_response");
+   	HTTP(playerid, HTTP_GET, string, "", "TFASAMP_check_response");
    	return 1;
 }
 
@@ -433,8 +433,8 @@ public TFASAMP_verifyToken_response(index, response_code, data[])
 	return 1;
 }
 
-forward TFA_push_response(index, response_code, data[]);
-public TFA_push_response(index, response_code, data[]){
+forward TFASAMP_push_response(index, response_code, data[]);
+public TFASAMP_push_response(index, response_code, data[]){
 
 	if(TFASAMP_isDebugActive()) {
 		printf("(debug) TFA_push_response: 'index' = '%d'", index);
@@ -458,8 +458,8 @@ public TFA_push_response(index, response_code, data[]){
 	}
 }
 
-forward TFA_check_response(index, response_code, data[]);
-public TFA_check_response(index, response_code, data[]){
+forward TFASAMP_check_response(index, response_code, data[]);
+public TFASAMP_check_response(index, response_code, data[]){
 
 	if(TFASAMP_isDebugActive()) {
 		printf("(debug) TFA_check_response: 'index' = '%d'", index);
