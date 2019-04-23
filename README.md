@@ -44,18 +44,10 @@ Include in your code and begin using the library:
 
 https://github.com/authy/authy-php
 
-http://forum.sa-mp.com/showthread.php?t=169354
-
-http://forum.sa-mp.com/showthread.php?t=166016
 
 ## Usage
 
-<!--
-Write your code documentation or examples here. If your library is documented in
-the source code, direct users there. If not, list your API and describe it well
-in this section. If your library is passive and has no API, simply omit this
-section.
--->
+Check out the [example file 1](https://github.com/GiampaoloFalqui/TFA_SAMP/blob/master/tfasamp_example.pwn) and [example file 2](https://github.com/GiampaoloFalqui/TFA_SAMP/blob/master/tfasamp_example2.pwn).
 
 ## Testing
 

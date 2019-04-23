@@ -48,17 +48,19 @@ switch($_GET['command']) {
       
       /** 
        * This is a demonstration of how it should work with the 'raw' return type.
-       */      
+       */
+      /*
       $result = $TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code'], 'raw');
       if ($result) {
         foreach($result as $key => $value) {
           echo "{$key} => {$value}";
         }
       }
-      
+      */
       /** 
        * This is a demonstration of how it should work with the 'json' return type.
        */ 
+      
       $result = $TFA_SAMP->createUser($args['email'], $args['cellphone'], $args['area_code'], 'json');
       if ($result) {
         echo $result;
@@ -77,16 +79,18 @@ switch($_GET['command']) {
       /** 
        * This is a demonstration of how it should work with the 'raw' return type.
        */
+      /*
       $result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'raw');
       if ($result) {
         foreach($result as $key => $value) {
           echo "{$key} => {$value}";
         }
       }
-      
+      */
       /** 
        * This is a demonstration of how it should work with the 'json' return type.
-       */      
+       */
+      
       $result = $TFA_SAMP->verifyToken($args['userid'], $args['token'], $args['settings'], 'json');
       if ($result) {
         echo $result;
@@ -95,6 +99,32 @@ switch($_GET['command']) {
     } catch(Exception $checkError) {
       echo $checkError->getMessage();
     }		
+    break;
+  }
+
+  case 'pushNoti':{
+    try{
+      $args = $_GET + array('userid' => null, 'message' => null, 'opt' => null);
+      $result = $TFA_SAMP->pushNotification($args['userid'], $args['message'], $args['opt'], 'json');
+      if($result){
+        echo $result;
+      }
+    }catch(Exception $checkError){
+      echo $checkError->getMessage();
+    }
+    break;
+  }
+
+  case 'checkNoti':{
+    try{
+      $args = $_GET + array('uuid' => null);
+      $result = $TFA_SAMP->checkNotification($args['uuid']);
+      if($result){
+        echo $result;
+      }
+    }catch(Exception $checkError){
+      echo $checkError->getMessage();
+    }
     break;
   }
 	
